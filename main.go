@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/0x0f0f0f/linear-weighted-automata-bisimulation/automata"
+	aut "github.com/0x0f0f0f/linear-weighted-automata-bisimulation/automata"
+	"gonum.org/v1/gonum/mat"
 )
 
 func check(err error) {
@@ -14,7 +15,22 @@ func check(err error) {
 }
 
 func main() {
-	a, err := automata.ReadAutomaton(os.Stdin, true)
+	v1 := mat.NewVecDense(3, []float64{1.0, 2.0, 3.0})
+	v2 := mat.NewVecDense(3, []float64{3.0, 2.0, 1.0})
+	p1, err := aut.NewPair(v1, v2)
+	check(err)
+
+	v3 := mat.NewVecDense(3, []float64{4.0, 3.0, 5.0})
+	v4 := mat.NewVecDense(3, []float64{6.0, 3.0, 3.0})
+	p2, err := aut.NewPair(v3, v4)
+	check(err)
+
+	r := aut.NewRelation()
+	r.Add(p1)
+
+	fmt.Println(r.PairIsInCongruenceClosure(p2))
+
+	a, err := aut.ReadAutomaton(os.Stdin, true)
 	check(err)
 	fmt.Println(a.String())
 }

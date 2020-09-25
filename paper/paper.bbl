@@ -1,0 +1,14 @@
+\begin{thebibliography}{1}
+
+\bibitem{DBLP:journals/corr/Bonchi0K17}
+Filippo Bonchi, Barbara K{\"{o}}nig, and Sebastian K{\"{u}}pper.
+\newblock Up-to techniques for weighted systems (extended version).
+\newblock {\em CoRR}, abs/1701.05001, 2017.
+
+\bibitem{BONCHI201277}
+Filippo Bonchi, Marcello Bonsangue, Michele Boreale, Jan Rutten, and Alexandra
+  Silva.
+\newblock A coalgebraic perspective on linear weighted automata.
+\newblock {\em Information and Computation}, 211:77 -- 105, 2012.
+
+\end{thebibliography}
