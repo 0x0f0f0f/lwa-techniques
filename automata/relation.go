@@ -12,6 +12,7 @@ type Relation struct {
 	u []*mat.VecDense // generating set for the congruence closure
 }
 
+// creates a new empty relation
 func NewRelation() Relation {
 	return Relation{}
 }
@@ -28,13 +29,13 @@ func (r Relation) Has(p *Pair) bool {
 
 // adds a pair of vectors to the relation
 func (r *Relation) Add(p *Pair) {
-	// if the set already contains the pair, return
+	// if the set already contains the pair (v, v'), return
 	if r.Has(p) {
 		return
 	}
-	// add the pair to the set
+	// add the pair (v,v') to the set
 	r.s = append(r.s, p)
-	// subtract the elements of the pair
+	// sub = v - v'
 	sub := mat.VecDenseCopyOf(p.Left)
 	sub.SubVec(p.Left, p.Right)
 
@@ -50,10 +51,13 @@ func (r *Relation) Add(p *Pair) {
 	}
 }
 
+// check if a pair of vectors is in a relation's congruence closure.
 func (r Relation) PairIsInCongruenceClosure(p *Pair) bool {
+	// sub = v - v'
 	sub := mat.VecDenseCopyOf(p.Left)
 	sub.SubVec(p.Left, p.Right)
 
+	// (v, v') ∈ c(R) iff v - v' ∈ U_R
 	for _, v := range r.u {
 		if mat.Equal(v, sub) {
 			return true

@@ -13,6 +13,8 @@
 \usepackage{microtype}      % microtypography
 \usepackage{lipsum}
 \usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{stmaryrd}
 \usepackage{amsfonts}
 
 
@@ -36,6 +38,10 @@
 \def\Q{\mathbb{Q}}
 \def\R{\mathbb{R}}
 \def\Z{\mathbb{Z}}
+\def\K{\mathbb{K}}
+
+\DeclarePairedDelimiter\sqmap{\llbracket}{\rrbracket}
+
 
 % matrix commands
 \newcommand{\vvec}[2]{
@@ -94,11 +100,11 @@
 Weighted automata generalize non-deterministic automata by adding
 a quantity expressing the weight (or probability) of the execution of each transition.
 In this work we propose an implementation of two algorithms for computing language 
-equivalence in finite state Linear Weighted Automata (LWAs). The first, a
+equivalence in finite state linear weighted automata (LWAs). The first, a
 linear partition refinement algorithm, calculates the linear weighted bisimulation
-for any given LWA, the second algorithm is to check the equivalence 
-of two state vectors for a weighted automata, and is used to verify the results
-from the first algorithm. We then provide and compare runtime results. 
+for any given LWA, the second algorithm checks the equivalence 
+of two vectors (states) for a given weighted automata, and is used to verify the results
+of the first algorithm. We then provide and compare runtime results. 
 \end{abstract}
 
 
@@ -107,46 +113,98 @@ from the first algorithm. We then provide and compare runtime results.
 
 
 \section{Introduction}
+\label{sec:intro}
+
 In \cite{DBLP:journals/corr/Bonchi0K17}, up-to techniques are defined for
 weighted systems over arbitrary semirings, while in \cite{BONCHI201277}, up-to techniques
-are studied under a more abstract coalgebraic perspective. For simplicity, this example implementation
-is focused on weighted automata over the field $\R$ of real numbers, represented with double
-precision floating point machine numbers.
+are studied under a more abstract coalgebraic perspective. For the sake of simplicity of 
+the implementation, we focus only on weighted automata over the field of real numbers 
+$\R$. Real numbers are implemented with double precision floating point numbers,  
+known as the \texttt{float64} type in the Go programming language.
 
-We first fix some notation used in the paper.
+
+\section{Preliminaries and Notation}
+\label{sec:notation}
+
 \begin{defn}
-  A binary relation $R$ between two sets $X, Y$ is a subset of the Cartesian Product: 
-  $R \subseteq X \times Y$. A relation is called \textit{homogeneous} or an \textit{endorelation},
-  if it is a binary relation over $X$ and itself: $R \subseteq X \times X$ It can be simply called a binary relation
-  over $X$.
-  
+  A \textit{weighted automaton} over a field $\K$ and an alphabet $A$ is a triple 
+  $(X,o,t)$ such that $X$ is a finite set of states, $t = (t_a : X \to K)_{a \in A}$
+  is a set of transition functions indexed over the symbols of the alphabet and $o : X 
+  \to \K$ is the output function. The transition functions $t_a$ are represented as
+  $\K^{X \times X}$ matrices. $o \in \K^X$ is represented as a row vector.
+  $t_a(v)$ denotes the vector obtained by multiplying the matrix $t_a$ by the vector $v 
+  \in \K^X$. $o(v)$ denotes the scalar $s \in \K^X$ obtained by multiplying the row
+  vector $o$ by the column vector $v \in \K^X$.
+  $A^*$ is the set of all words over $A$. $\epsilon$ is the empty word and $aw$ is the
+  concatenation of a letter $a$ to the word $w \in A^*$.
+  A weighted language is a function $\psi: A^* \to \K$.
+  A function mapping each state vector into its 
+  accepted language, $\sqmap{\cdot}: \K^X \to K^{A^*}$ is defined as follows for every weighted automaton:
+
+  \begin{equation*}
+    \begin{aligned}
+      \forall v \in \K^X, a \in A, w \in A^* \quad \quad
+      \sqmap{v}(\epsilon) = o(v) \quad \quad
+      \sqmap{v}(aw) = \sqmap{t_a(v)}(w)  
+    \end{aligned}
+  \end{equation*}
+
+  Two vectors $v_1, v_2 \in \K^X$ are called language equivalent $v_1 \sim v_2 \iff \sqmap
+  {v_1} = \sqmap{v_2}$. One can extend the notion of language equivalence to states rather
+  than for vectors by assigning to each state $x \in X$ the corresponding unit vector 
+  $e_x \in \K^X$. When given an initial state $i$ for a weighted automaton, the language 
+  of the automaton can be defined as $\sqmap{i}$.
 \end{defn}
 
 
-\lipsum[2]
-\lipsum[3]
+\begin{defn}
+  A binary relation $R \subseteq X \times Y$ between two sets $X, Y$ is a subset of the 
+  cartesian product of the sets. A relation is called \textit{homogeneous} or an \textit
+  {endorelation} if it is a binary relation over $X$ and itself: $R \subseteq X \times
+   X$. 
+  In such case, it is simply called a binary relation over $X$.
+  An \textit{equivalence relation} is a binary relation that is reflexive, symmetric and
+  transitive. 
+\end{defn}
+  
+An equivalence relation which is compatible with all the operations of
+the algebraic structure on which it is defined on, is called a 
+\textit{congruence relation}. Compatibility with the algebraic structure operations
+means that algebraic operations applied on equivalent elements will still
+yield equivalent elements. 
 
 
-\section{Headings: first level}
-\label{sec:headings}
+\begin{defn}
+  The congruence closure $c(R)$ of a relation R is the smallest congruence relation 
+  $R'$ such that $R \subseteq R'$ 
+\end{defn}
 
-\lipsum[4] See Section \ref{sec:headings}.
+\begin{defn}
+  \textbf{} \\
+  
+\end{defn}
+
+\section{Implementation}
+\label{sec:impl}
+
+The algorithms and data structures for this paper are implemented in the Go programming 
+language. This implementation makes use of the \textit{Gonum} library for numerical 
+computations. We only import the Gonum libraries for matrices and linear algebra 
+and visual plotting of samples and functions.
+
+See Section \ref{sec:headings}.
 
 \subsection{Headings: second level}
-\lipsum[5]
-\begin{equation}
-\xi _{ij}(t)=P(x_{t}=i,x_{t+1}=j|y,v,w;\theta)= {\frac {\alpha _{i}(t)a^{w_t}_{ij}\beta _{j}(t+1)b^{v_{t+1}}_{j}(y_{t+1})}{\sum _{i=1}^{N} \sum _{j=1}^{N} \alpha _{i}(t)a^{w_t}_{ij}\beta _{j}(t+1)b^{v_{t+1}}_{j}(y_{t+1})}}
-\end{equation}
+
 
 \subsubsection{Headings: third level}
-\lipsum[6]
 
 \paragraph{Paragraph}
-\lipsum[7]
 
 \section{Examples of citations, figures, tables, references}
 \label{sec:others}
-\lipsum[8] \cite{kour2014real,kour2014fast} and see \cite{hadash2018estimate}.
+
+\cite{kour2014real,kour2014fast} and see \cite{hadash2018estimate}.
 
 The documentation for \verb+natbib+ may be found at
 \begin{center}
@@ -168,9 +226,7 @@ produces
 
 
 \subsection{Figures}
-\lipsum[10] 
 See Figure \ref{fig:fig1}. Here is how you add footnotes. \footnote{Sample of the first footnote.}
-\lipsum[11] 
 
 \begin{figure}
   \centering
@@ -180,7 +236,6 @@ See Figure \ref{fig:fig1}. Here is how you add footnotes. \footnote{Sample of th
 \end{figure}
 
 \subsection{Tables}
-\lipsum[12]
 See awesome Table~\ref{tab:table}.
 
 \begin{table}
