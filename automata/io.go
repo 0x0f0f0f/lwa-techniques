@@ -95,10 +95,10 @@ func ReadAutomaton(r io.Reader, prompt bool) (*Automaton, error) {
 	if !scanner.Scan() {
 		return nil, errRead("could not read alphabet")
 	}
-	a.Σ = strings.Fields(scanner.Text())
+	a.A = strings.Fields(scanner.Text())
 	// Deduplicate elements in the alphabet
-	a.Σ = dedupStr(a.Σ)
-	if len(a.Σ) < 1 {
+	a.A = dedupStr(a.A)
+	if len(a.A) < 1 {
 		return nil, errRead("alphabet is empty")
 	}
 
@@ -126,7 +126,7 @@ func ReadAutomaton(r io.Reader, prompt bool) (*Automaton, error) {
 
 	// Read a transition matrix for each symbol in the alphabet
 	a.T = make(map[string]*mat.Dense)
-	for _, symb := range a.Σ {
+	for _, symb := range a.A {
 		if prompt {
 			fmt.Fprintf(os.Stderr, "enter a %dx%d matrix:\n", numStates, numStates)
 		}
@@ -145,8 +145,8 @@ func (a Automaton) FancyString() string {
 	var buf bytes.Buffer
 
 	// Print the alphabet
-	buf.WriteString("Σ = ")
-	buf.WriteString(strings.Join(a.Σ, " "))
+	buf.WriteString("A = ")
+	buf.WriteString(strings.Join(a.A, " "))
 	buf.WriteString("\n")
 
 	// Print the output vector
@@ -167,7 +167,7 @@ func (a Automaton) String() string {
 	var buf bytes.Buffer
 
 	// Print the alphabet
-	buf.WriteString(strings.Join(a.Σ, " "))
+	buf.WriteString(strings.Join(a.A, " "))
 	buf.WriteString("\n")
 
 	// Print the output vector

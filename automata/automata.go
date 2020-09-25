@@ -15,7 +15,7 @@ import (
 func errRead(msg string) error { return errors.New("could not read automaton:" + msg) }
 
 type Automaton struct {
-	Σ []string              // The input alphabet
+	A []string              // The input alphabet
 	T map[string]*mat.Dense // Transition matrices are maps from input symbols to dense real valued matrices
 	O *mat.VecDense         // Output vector uses a dense real valued vector
 }
