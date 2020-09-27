@@ -124,6 +124,8 @@ func ReadAutomaton(r io.Reader, prompt bool) (*Automaton, error) {
 	}
 	a.O = mat.NewVecDense(len(outv), outv)
 
+	fmt.Println(a.O.T().Dims())
+
 	// Read a transition matrix for each symbol in the alphabet
 	a.T = make(map[string]*mat.Dense)
 	for _, symb := range a.A {

@@ -100,11 +100,15 @@
 Weighted automata generalize non-deterministic automata by adding
 a quantity expressing the weight (or probability) of the execution of each transition.
 In this work we propose an implementation of two algorithms for computing language 
-equivalence in finite state linear weighted automata (LWAs). The first, a
-linear partition refinement algorithm, calculates the linear weighted bisimulation
-for any given LWA, the second algorithm checks the equivalence 
-of two vectors (states) for a given weighted automata, and is used to verify the results
-of the first algorithm. We then provide and compare runtime results. 
+equivalence in finite state weighted automata (WAs). The first, a
+linear partition refinement algorithm, calculates the largest linear weighted bisimulation
+for any given LWA (Linear Weighted Automata) through an iterative method, 
+the second algorithm checks the language equivalence 
+of two vectors (states) for a given weighted automata by using an additional
+data structure representing a congruence relationship between states.
+We then compare the two algorithms results on randomly generated automata samples,
+to verify their correctness and provide some runtime statistics.
+
 \end{abstract}
 
 
@@ -117,11 +121,9 @@ of the first algorithm. We then provide and compare runtime results.
 
 In \cite{DBLP:journals/corr/Bonchi0K17}, up-to techniques are defined for
 weighted systems over arbitrary semirings, while in \cite{BONCHI201277}, up-to techniques
-are studied under a more abstract coalgebraic perspective. For the sake of simplicity of 
-the implementation, we focus only on weighted automata over the field of real numbers 
-$\R$. Real numbers are implemented with double precision floating point numbers,  
-known as the \texttt{float64} type in the Go programming language.
-
+are defined for Linear Weighted Automata (LWAs), under a more abstract coalgebraic perspective.
+For ease of implementation, we focus only on weighted automata over the field of real numbers 
+$\R$. 
 
 \section{Preliminaries and Notation}
 \label{sec:notation}
@@ -131,10 +133,10 @@ known as the \texttt{float64} type in the Go programming language.
   $(X,o,t)$ such that $X$ is a finite set of states, $t = (t_a : X \to K)_{a \in A}$
   is a set of transition functions indexed over the symbols of the alphabet and $o : X 
   \to \K$ is the output function. The transition functions $t_a$ are represented as
-  $\K^{X \times X}$ matrices. $o \in \K^X$ is represented as a row vector.
-  $t_a(v)$ denotes the vector obtained by multiplying the matrix $t_a$ by the vector $v 
-  \in \K^X$. $o(v)$ denotes the scalar $s \in \K^X$ obtained by multiplying the row
-  vector $o$ by the column vector $v \in \K^X$.
+  $\K^{X \times X}$ matrices. $o \in \K^{1 \times X}$ is represented as a row vector.
+  $t_a(v)$ denotes the vector obtained by multiplying the matrix $t_a$ by the column 
+  vector $v  \in \K^{X \times 1}$. $o(v)$ denotes the scalar $s \in \K$ obtained by 
+  multiplying the row vector $o$ by the column vector $v \in \K^{X \times 1}$.
   $A^*$ is the set of all words over $A$. $\epsilon$ is the empty word and $aw$ is the
   concatenation of a letter $a$ to the word $w \in A^*$.
   A weighted language is a function $\psi: A^* \to \K$.
@@ -149,7 +151,7 @@ known as the \texttt{float64} type in the Go programming language.
     \end{aligned}
   \end{equation*}
 
-  Two vectors $v_1, v_2 \in \K^X$ are called language equivalent $v_1 \sim v_2 \iff \sqmap
+  Two vectors $v_1, v_2 \in \K^{X\times 1}$ are called language equivalent, denoted with $v_1 \sim v_2 \iff \sqmap
   {v_1} = \sqmap{v_2}$. One can extend the notion of language equivalence to states rather
   than for vectors by assigning to each state $x \in X$ the corresponding unit vector 
   $e_x \in \K^X$. When given an initial state $i$ for a weighted automaton, the language 
@@ -191,6 +193,10 @@ The algorithms and data structures for this paper are implemented in the Go prog
 language. This implementation makes use of the \textit{Gonum} library for numerical 
 computations. We only import the Gonum libraries for matrices and linear algebra 
 and visual plotting of samples and functions.
+
+Real numbers are implemented with double precision floating point numbers,  
+known as the \texttt{float64} type in the Go programming language.
+
 
 See Section \ref{sec:headings}.
 

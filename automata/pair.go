@@ -2,6 +2,7 @@ package automata
 
 import (
 	"errors"
+	"fmt"
 
 	"gonum.org/v1/gonum/mat"
 )
@@ -33,4 +34,11 @@ func (p Pair) Eqs(p1 *Pair) bool {
 	eqr := mat.Equal(p.Left, p1.Right) && mat.Equal(p.Right, p1.Left)
 
 	return eql || eqr
+}
+
+func (p Pair) String() string {
+	fl := mat.Formatted(p.Left, mat.FormatMATLAB())
+	fr := mat.Formatted(p.Right, mat.FormatMATLAB())
+
+	return fmt.Sprintf("(%.5g, %.5g)", fl, fr)
 }

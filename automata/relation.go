@@ -1,6 +1,9 @@
 package automata
 
 import (
+	"bytes"
+	"fmt"
+
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -65,4 +68,12 @@ func (r Relation) PairIsInCongruenceClosure(p *Pair) bool {
 	}
 
 	return false
+}
+
+func (r Relation) String() string {
+	b := bytes.Buffer{}
+	for _, uel := range r.u {
+		b.WriteString(fmt.Sprintf("%.5g,", mat.Formatted(uel, mat.FormatMATLAB())))
+	}
+	return fmt.Sprintf("(s = %v, u = [%s])", r.s, b.String())
 }
