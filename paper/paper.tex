@@ -13,9 +13,17 @@
 \usepackage{microtype}      % microtypography
 \usepackage{lipsum}
 \usepackage{amsthm}
+\usepackage{amsmath}
 \usepackage{mathtools}
+\usepackage[table]{xcolor}
 \usepackage{stmaryrd}
 \usepackage{amsfonts}
+
+% Code with syntax highlighting
+\usepackage{fancyvrb}
+\usepackage{listings}
+\usepackage{textcomp}
+\usepackage{placeins}
 
 
 \theoremstyle{plain}% default
@@ -41,20 +49,42 @@
 \def\K{\mathbb{K}}
 
 \DeclarePairedDelimiter\sqmap{\llbracket}{\rrbracket}
+\DeclarePairedDelimiter\spanset{\langle}{\rangle}
+
+
+\newcommand{\diag}[1]{\text{diag}\left(#1\right)}
+\newcommand{\mspan}[1]{\text{span}\left(#1\right)}
+\newcommand{\dom}{\text{dom}}
+\newcommand{\mker}[1]{\text{ker}\left(#1\right)}
+\newcommand{\mrank}[1]{\text{rank}\left(#1\right)}
 
 
 % matrix commands
 \newcommand{\vvec}[2]{
-	\begin{bmatrix}
+	\begin{pmatrix}
 		#1 \\ #2
-	\end{bmatrix}
+	\end{pmatrix}
 }
 \newcommand{\vvvec}[3]{
-	\begin{bmatrix}
+	\begin{pmatrix}
 		#1 \\ #2 \\ #3
-	\end{bmatrix}
+	\end{pmatrix}
+}
+\newcommand{\vvvvec}[4]{
+	\begin{pmatrix}
+		#1 \\ #2 \\ #3 \\ #4
+	\end{pmatrix}
 }
 
+% Code Listings
+\definecolor{vgreen}{RGB}{104,180,104}
+\definecolor{vblue}{RGB}{49,49,255}
+\definecolor{vorange}{RGB}{255,143,102}
+\lstset{
+	basicstyle=\ttfamily,
+	columns=fullflexible,
+	keepspaces=true,
+}
 
 \title{Go Implementation of Up-To Techniques for Equivalence of Weighted Languages}
 
@@ -102,12 +132,12 @@ a quantity expressing the weight (or probability) of the execution of each trans
 In this work we propose an implementation of two algorithms for computing language 
 equivalence in finite state weighted automata (WAs). The first, a
 linear partition refinement algorithm, calculates the largest linear weighted bisimulation
-for any given LWA (Linear Weighted Automata) through an iterative method, 
+for any given LWA (Linear Weighted Automaton) through an iterative method, 
 the second algorithm checks the language equivalence 
 of two vectors (states) for a given weighted automata by using an additional
 data structure representing a congruence relationship between states.
-We then compare the two algorithms results on randomly generated automata samples,
-to verify their correctness and provide some runtime statistics.
+We then compare the two algorithms results to verify their correctness
+on randomly generated automata samples, and provide some runtime statistics.
 
 \end{abstract}
 
@@ -131,14 +161,14 @@ $\R$.
 \begin{defn}
   A \textit{weighted automaton} over a field $\K$ and an alphabet $A$ is a triple 
   $(X,o,t)$ such that $X$ is a finite set of states, $t = (t_a : X \to K)_{a \in A}$
-  is a set of transition functions indexed over the symbols of the alphabet and $o : X 
+  is a set of transition functions indexed over the symbols of the alphabet $A$ and $o : X 
   \to \K$ is the output function. The transition functions $t_a$ are represented as
   $\K^{X \times X}$ matrices. $o \in \K^{1 \times X}$ is represented as a row vector.
   $t_a(v)$ denotes the vector obtained by multiplying the matrix $t_a$ by the column 
   vector $v  \in \K^{X \times 1}$. $o(v)$ denotes the scalar $s \in \K$ obtained by 
-  multiplying the row vector $o$ by the column vector $v \in \K^{X \times 1}$.
+  dot product of the row vector $o$ with $v \in \K^{X \times 1}$.
   $A^*$ is the set of all words over $A$. $\epsilon$ is the empty word and $aw$ is the
-  concatenation of a letter $a$ to the word $w \in A^*$.
+  concatenation of a symbol $a$ to the word $w \in A^*$.
   A weighted language is a function $\psi: A^* \to \K$.
   A function mapping each state vector into its 
   accepted language, $\sqmap{\cdot}: \K^X \to K^{A^*}$ is defined as follows for every weighted automaton:
@@ -151,7 +181,8 @@ $\R$.
     \end{aligned}
   \end{equation*}
 
-  Two vectors $v_1, v_2 \in \K^{X\times 1}$ are called language equivalent, denoted with $v_1 \sim v_2 \iff \sqmap
+  Two vectors $v_1, v_2 \in \K^{X\times 1}$ are called language equivalent, denoted with 
+  $v_1 \sim v_2 $ if and only if $ \sqmap
   {v_1} = \sqmap{v_2}$. One can extend the notion of language equivalence to states rather
   than for vectors by assigning to each state $x \in X$ the corresponding unit vector 
   $e_x \in \K^X$. When given an initial state $i$ for a weighted automaton, the language 
@@ -186,7 +217,26 @@ yield equivalent elements.
   
 \end{defn}
 
-\section{Algorithm}
+\section{Algorithms}
+
+\subsection{Forward Partition Refinement Algorithm for the Largest Weighted Bisimulation}
+\label{sec:algo2}
+
+The algorithm is defined by the iterative method:
+\begin{eqnarray}
+  R_0 = \mker{o}, & \quad & R_{i+1} = R_i \cap \bigcap_{a \in A} t_a(R_i)^{-1} \label{fwd} 
+\end{eqnarray}
+The algorithm stops when $R_{j+1} = R_j$. Proof is available in section 4.1 of \cite{BONCHI201277}
+
+
+\subsection{Backwards Partition Refinement Algorithm for the Largest Weighted Bisimulation}
+\label{sec:algo2}
+
+The algorithm is defined by the iterative method:
+\begin{eqnarray}
+  R_0 = \mker{o}^0, & \quad & R_{i+1} = R_i + \sum_{a \in A} t_a(R_i)^t \label{back} 
+\end{eqnarray}
+The algorithm stops when $R_{j+1} = R_j$. Proof is available in section 4.2 of \cite{BONCHI201277}
 
 \section{Implementation}
 \label{sec:impl}
@@ -205,6 +255,81 @@ See Section \ref{sec:headings}.
 \subsection{Input file format}
 
 \subsection{Calculating the intersection of linear subspaces}
+
+To compute algorithm (\ref{fwd}), we need an efficient way to calculate a basis 
+of the intersection of an arbitrary number of linear subspaces of $\R^n$, given their 
+spanning sets. 
+
+
+
+
+\begin{defn}
+  \textbf{Algorithm for a basis of the intersection of subspaces} \\
+  Defined in file \texttt{lin/intersect.go}.
+  Let's consider two linear subspaces of 
+  $\R^n$ defined with their spanning sets of column vectors: 
+  $U = \spanset{u_1, u_2, \hdots, u_p}$ 
+  and $W = \spanset{w_1, w_2, \hdots, w_k}$.
+  We create the block matrix $A \in \R^{n \times (p+k)}$ defined as follows:
+  
+  \begin{equation*}
+    \begin{aligned}
+      a_{ij} = \begin{cases}
+        (u_j)_i & \text{for  } j = 1, \hdots, p \quad i = 1, \hdots, n \\
+        (w_{j-p})_i & \text{for  } j = p+1, \hdots, p+k \quad i = 1, \hdots, n \\
+      \end{cases}
+    \end{aligned}
+  \end{equation*}
+  
+  The matrix will have the form
+  \begin{equation*}
+    A = \begin{bmatrix}
+      \vvvec{}{u_1}{\,}, \hdots \vvvec{}{u_p}{\,}, 
+      \vvvec{}{w_1}{\,}, \hdots \vvvec{}{w_k}{\,} 
+    \end{bmatrix}
+  \end{equation*}
+
+  It follows that $\mker{A}$ is a basis for $U \cap W$. This can be done with an 
+  arbitrary finite number of subspaces of $\R^n$, as long as their spanning set is 
+  \textit{finite}.
+\end{defn}
+
+\begin{defn}
+  \textbf{Algorithm for computing the nullspace} \\
+  The algorithm implementation can be found in file \texttt{lin/nullspace.go}; it is
+  adapted from \cite{scipy/ranknullspace}. 
+  Let's consider the singular value decomposition of a matrix $A \in \R^{m \times n}$:
+
+  \begin{equation*}
+    \begin{aligned}
+      A = U \Sigma V^T & \quad & \Sigma = \diag{\sigma_1, \sigma_2, \hdots, \sigma_{\min(m, n)}  } 
+       & \quad &  U \in \R^{m \times m} & \quad & V \in \R^{n \times n}
+    \end{aligned}
+  \end{equation*}
+
+  Where $V$ and $U$ are orthogonal and the singular values are ordered: $\sigma_1 \geq \sigma_2 \geq \hdots \geq \sigma_{\min(m,n)} \geq 0$.
+  It follows that $\mrank{A}$ is equal to the number of nonzero singular values and
+  a basis of the (right) null space of $A$ is the spanning set of the columns of V
+  corresponding to singular values equal to zero. 
+\end{defn}
+
+\begin{exmp}
+  The actual Go implementation is quite verbose, we can show a shorter Python 
+  implementation of the algorithm to compute the nullspace, using the 
+  \textit{SciPy} library \cite{scipy/ranknullspace}:
+
+  \begin{lstlisting}[language=python]
+def nullspace(A, atol=1e-13, rtol=0):
+    A = np.atleast_2d(A)
+    u, s, vh = svd(A)
+    tol = max(atol, rtol * s[0])
+    nnz = (s >= tol).sum()
+    ns = vh[nnz:].conj().T
+    return ns
+    \end{lstlisting}
+\end{exmp}
+
+
 
 
 \subsubsection{Headings: third level}
@@ -265,15 +390,11 @@ See awesome Table~\ref{tab:table}.
   \label{tab:table}
 \end{table}
 
-\subsection{Lists}
-\begin{itemize}
-\item Lorem ipsum dolor sit amet
-\item consectetur adipiscing elit. 
-\item Aliquam dignissim blandit est, in dictum tortor gravida eget. In ac rutrum magna.
-\end{itemize}
 
 
-\bibliographystyle{unsrt}  
+
+
+\bibliographystyle{unsrt}
 \bibliography{references}  %%% Remove comment to use the external .bib file (using bibtex).
 %%% and comment out the ``thebibliography'' section.
 

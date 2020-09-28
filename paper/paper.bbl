@@ -11,4 +11,10 @@ Filippo Bonchi, Marcello Bonsangue, Michele Boreale, Jan Rutten, and Alexandra
 \newblock A coalgebraic perspective on linear weighted automata.
 \newblock {\em Information and Computation}, 211:77 -- 105, 2012.
 
+\bibitem{scipy/ranknullspace}
+Open~Source Community.
+\newblock Scipy cookbook: Rank and nullspace of a matrix, 2011.
+\newblock Available online at
+  \url{https://scipy-cookbook.readthedocs.io/items/RankNullspace.html}.
+
 \end{thebibliography}

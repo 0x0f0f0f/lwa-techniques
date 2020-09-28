@@ -41,16 +41,4 @@ func main() {
 	res, err := a.HKC(v1, v2)
 	fmt.Println(res, err)
 
-	u1 := mat.NewVecDense(5, []float64{1.0, 2.0, 3.0, -1, 2})
-	u2 := mat.NewVecDense(5, []float64{2.0, 4.0, 7.0, 2, -1})
-	w1 := mat.NewVecDense(5, []float64{1, 2, 0, -2, -1})
-	w2 := mat.NewVecDense(5, []float64{0, 1, 1, -1, -1})
-	w3 := mat.NewVecDense(5, []float64{0, 1, -3, -6, 1})
-
-	base := aut.Intersect([]*mat.VecDense{u1, u2}, []*mat.VecDense{w1, w2, w3})
-
-	// print the intersection
-	for _, el := range base {
-		fmt.Println(mat.Formatted(el, mat.Squeeze()))
-	}
 }
