@@ -5,34 +5,27 @@ import (
 )
 
 // compute a basis for the intersection of many vector spaces
-func Intersect(spansets ...[]*mat.VecDense) []*mat.VecDense {
+func Intersect(spansets ...mat.Matrix) mat.Matrix {
 	// dimension of vector spaces
-	lengths := make([]int, len(spansets))
-	m := 0
+
+	a := mat.DenseCopyOf(spansets[0])
 	for i, span := range spansets {
-		lengths[i] = len(span)
-		if lengths[i] == 0 {
-			return []*mat.VecDense{}
+		if i == 0 {
+			continue
 		}
-		m += lengths[i]
-	}
 
-	// dimensions of vectors in subspaces
-	n, _ := spansets[0][0].Dims()
+		ar, ac := a.Dims()
+		_, sc := span.Dims()
 
-	// create block matrix a of the column vectors in U and W
-	a := mat.NewDense(n, m, nil)
+		m := mat.NewDense(ar, ac+sc, nil)
 
-	j := 0
-	for _, span := range spansets {
-		for _, vec := range span {
-			a.SetCol(j, vec.RawVector().Data)
-			j++
-		}
+		m.Augment(a, span)
+
+		a = m
 	}
 
 	// compute the nullspace
-	ker, _ := NullspaceSVD(a)
+	ker, _ := Nullspace(a)
 
 	return ker
 }

@@ -1,7 +1,6 @@
 package lin
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"testing"
@@ -25,7 +24,6 @@ func TestGaussPartial(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(x)
 	for i, xi := range x {
 		if math.Abs(tc.x[i]-xi) > ε {
 			log.Println("out of tolerance")

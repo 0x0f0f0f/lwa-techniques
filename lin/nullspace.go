@@ -1,7 +1,6 @@
 package lin
 
 import (
-	"fmt"
 	"log"
 	"math"
 
@@ -10,10 +9,10 @@ import (
 
 const tol = 10e-13
 
-// computes an orthonormal basis for the nullspace of a matrix a
+// columns of the returned matrix form an orthonormal basis
+// for the nullspace of matrix a, computed
 // through svd decomposition. also returns the maximum residual
-func NullspaceSVD(a mat.Matrix) ([]*mat.VecDense, float64) {
-
+func Nullspace(a mat.Matrix) (mat.Matrix, float64) {
 	// compute svd decomposition
 	var svd mat.SVD
 	if ok := svd.Factorize(a, mat.SVDFullV); !ok {
@@ -22,15 +21,11 @@ func NullspaceSVD(a mat.Matrix) ([]*mat.VecDense, float64) {
 	vt := mat.NewDense(1, 1, nil)
 	vt.Reset()
 	svd.VTo(vt)
-
-	ker := []*mat.VecDense{}
+	//PrintMat(vt)
+	//fmt.Println(svd.Values(nil))
 
 	// residual
 	res := 0.0
-
-	PrintMat(vt)
-
-	fmt.Println(svd.Values(nil))
 
 	// the (right) null space of A is the columns of vt corresponding to
 	// singular values equal to zero.
@@ -42,20 +37,19 @@ func NullspaceSVD(a mat.Matrix) ([]*mat.VecDense, float64) {
 		j++
 	}
 
-	fmt.Println(j)
-
-	for j := j; j < vt.RawMatrix().Cols; j++ {
+	for k := j; k < vt.RawMatrix().Cols; k++ {
 		v := mat.NewVecDense(1, nil)
 		v.Reset()
-		v.MulVec(a, vt.ColView(j))
+		v.MulVec(a, vt.ColView(k))
 		// current residual
 		currRes := mat.Norm(v, math.Inf(1))
 		if currRes > res {
 			res = currRes
 		}
-
-		ker = append(ker, vt.ColView(j).(*mat.VecDense))
 	}
+
+	m, n := vt.Dims()
+	ker := vt.Slice(0, m, j, n)
 
 	return ker, res
 }

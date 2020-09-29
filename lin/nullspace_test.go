@@ -9,37 +9,44 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-func TestNullspaceSVD(t *testing.T) {
-	a := mat.NewDense(3, 3, []float64{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0})
-	ker, res := NullspaceSVD(a)
+func TestNullspace(t *testing.T) {
+	a := mat.NewDense(3, 3, []float64{
+		1.0, 2.0, 3.0,
+		4.0, 5.0, 6.0,
+		7.0, 8.0, 9.0,
+	})
+	ker, res := Nullspace(a)
 
 	//fmt.Printf("%.60e\n", res)
 
 	expres := 8.8817841970012523233890533447265625e-16
 	assert.Equal(t, expres, res)
 
-	expker := []float64{
-		-4.082482904638624066073759877326665446162223815917968750000000e-01,
-		8.164965809277261454823815256531815975904464721679687500000000e-01,
-		-4.082482904638635723415518441470339894294738769531250000000000e-01}
-	for i, v := range expker {
-		assert.Equal(t, v, ker[0].AtVec(i))
-	}
+	expker := mat.NewDense(3, 1, []float64{
+		-0.408248290463862406607375987732666544616222381591796875,
+		0.81649658092772614548238152565318159759044647216796875,
+		-0.408248290463863572341551844147033989429473876953125,
+	})
+
+	assert.True(t, mat.Equal(expker, ker))
+
 }
 
-func TestNullspaceSVD2(t *testing.T) {
-	a := mat.NewDense(2, 3, []float64{1, 7, 2, -2, 3, 1})
-	ker, _ := NullspaceSVD(a)
+func TestNullspace2(t *testing.T) {
+	a := mat.NewDense(2, 3,
+		[]float64{
+			1, 7, 2,
+			-2, 3, 1,
+		})
+	ker, _ := Nullspace(a)
 
-	//fmt.Printf("%.60e\n", res)
+	expker := mat.NewDense(3, 1,
+		[]float64{
+			0.056343616981901080420502836432206095196306705474853515625,
+			-0.2817180849095055616970739720272831618785858154296875,
+			0.9578414886923187765432885498739778995513916015625,
+		})
 
-	expker := []float64{5.634361698190108e-02,
-		-2.8171808490950556e-01,
-		9.578414886923188e-01}
+	assert.True(t, mat.Equal(expker, ker))
 
-	assert.Len(t, ker, 1)
-
-	for i, v := range expker {
-		assert.Equal(t, v, ker[0].AtVec(i))
-	}
 }
