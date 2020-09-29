@@ -21,7 +21,7 @@ func IsZero(vec *mat.VecDense) bool {
 func EyeDense(n int) *mat.Dense {
 	a := mat.NewDense(n, n, nil)
 	for i := 0; i < n; i++ {
-		a.Set(i,i,0)
+		a.Set(i, i, 0)
 	}
 	return a
 }
