@@ -245,9 +245,10 @@ The algorithms and data structures for this paper are implemented in the Go prog
 language. This implementation makes use of the \textit{Gonum} library for numerical 
 computations. We only import the Gonum libraries for matrices and linear algebra 
 and visual plotting of samples and functions.
-
 Real numbers are implemented with double precision floating point numbers,  
 known as the \texttt{float64} type in the Go programming language.
+
+
 
 
 See Section \ref{sec:headings}.
@@ -259,9 +260,6 @@ See Section \ref{sec:headings}.
 To compute algorithm (\ref{fwd}), we need an efficient way to calculate a basis 
 of the intersection of an arbitrary number of linear subspaces of $\R^n$, given their 
 spanning sets. 
-
-
-
 
 \begin{defn}
   \textbf{Algorithm for a basis of the intersection of subspaces} \\
@@ -331,10 +329,20 @@ def nullspace(A, atol=1e-13, rtol=0):
 
 
 
+\subsection{Implementing the backwards algorithm}
+
+To compute the orthogonal complement of a vector subspace $W$, we
+compute $W^\perp = \mker{A^T}$, where $A$ is the matrix consisting 
+of the columns in the spanning set of $W$. Precisely, $W$ is the span 
+of the column space of $A$. Proof is available in \cite{ila}.
+
 
 \subsubsection{Headings: third level}
 
 \paragraph{Paragraph}
+
+
+
 
 \section{Examples of citations, figures, tables, references}
 \label{sec:others}

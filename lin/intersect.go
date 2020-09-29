@@ -1,32 +1,38 @@
 package lin
 
-import "gonum.org/v1/gonum/mat"
+import (
+	"gonum.org/v1/gonum/mat"
+)
 
-// compute the intersection of two vector spaces
-func Intersect(uspan, wspan []*mat.VecDense) []*mat.VecDense {
+// compute a basis for the intersection of many vector spaces
+func Intersect(spansets ...[]*mat.VecDense) []*mat.VecDense {
 	// dimension of vector spaces
-	m := len(uspan)
-	k := len(wspan)
-
-	if m == 0 || k == 0 {
-		return []*mat.VecDense{}
+	lengths := make([]int, len(spansets))
+	m := 0
+	for i, span := range spansets {
+		lengths[i] = len(span)
+		if lengths[i] == 0 {
+			return []*mat.VecDense{}
+		}
+		m += lengths[i]
 	}
 
-	// dimensions of vectors in U and W
-	n, _ := uspan[0].Dims()
+	// dimensions of vectors in subspaces
+	n, _ := spansets[0][0].Dims()
 
 	// create block matrix a of the column vectors in U and W
-	a := mat.NewDense(n, m+k, nil)
-	var j int
-	for j = 0; j < m; j++ {
-		a.SetCol(j, uspan[j].RawVector().Data)
-	}
-	for j := 0; j < k; j++ {
-		a.SetCol(m+j, wspan[j].RawVector().Data)
+	a := mat.NewDense(n, m, nil)
+
+	j := 0
+	for _, span := range spansets {
+		for _, vec := range span {
+			a.SetCol(j, vec.RawVector().Data)
+			j++
+		}
 	}
 
 	// compute the nullspace
-	ker, _ := Nullspace(a)
+	ker, _ := NullspaceSVD(a)
 
 	return ker
 }
