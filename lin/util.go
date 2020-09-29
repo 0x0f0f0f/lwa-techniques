@@ -17,29 +17,11 @@ func IsZero(vec *mat.VecDense) bool {
 	return true
 }
 
-// create a slice of m unitary vectors of R^n
-func UnitaryVecs(n, m int) []*mat.VecDense {
-	if m > n {
-		panic(fmt.Errorf("cannot create more than %d unitary vectors of R^%d", n, n))
-	}
-
-	basis := make([]*mat.VecDense, m)
-	for i := 0; i < m; i++ {
-		// make an the i-th unitary vector
-		unitary := make([]float64, n)
-		unitary[i] = 1
-		basis[i] = mat.NewVecDense(n, unitary)
-	}
-
-	return basis
-}
-
 // create an n*n identity matrix
 func EyeDense(n int) *mat.Dense {
-	units := UnitaryVecs(n, n)
 	a := mat.NewDense(n, n, nil)
-	for i, e := range units {
-		a.SetRow(i, e.RawVector().Data)
+	for i := 0; i < n; i++ {
+		a.Set(i,i,0)
 	}
 	return a
 }
