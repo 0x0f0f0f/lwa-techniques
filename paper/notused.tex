@@ -1,0 +1,36 @@
+\subsection{Calculating the intersection of linear subspaces}
+
+To compute algorithm (\ref{fwd}), we need an efficient way to calculate a basis 
+of the intersection of an arbitrary number of linear subspaces of $\R^n$, given their 
+spanning sets. 
+
+\begin{defn}
+  \textbf{Algorithm for a basis of the intersection of subspaces} \\
+  Defined in file \texttt{lin/intersect.go}.
+  Let's consider two linear subspaces of 
+  $\R^n$ defined with their spanning sets of column vectors: 
+  $U = \spanset{u_1, u_2, \hdots, u_p}$ 
+  and $W = \spanset{w_1, w_2, \hdots, w_k}$.
+  We create the block matrix $A \in \R^{n \times (p+k)}$ defined as follows:
+  
+  \begin{equation*}
+    \begin{aligned}
+      a_{ij} = \begin{cases}
+        (u_j)_i & \text{for  } j = 1, \hdots, p \quad i = 1, \hdots, n \\
+        (w_{j-p})_i & \text{for  } j = p+1, \hdots, p+k \quad i = 1, \hdots, n \\
+      \end{cases}
+    \end{aligned}
+  \end{equation*}
+  
+  The matrix will have the form
+  \begin{equation*}
+    A = \begin{bmatrix}
+      \vvvec{}{u_1}{\,}, \hdots \vvvec{}{u_p}{\,}, 
+      \vvvec{}{w_1}{\,}, \hdots \vvvec{}{w_k}{\,} 
+    \end{bmatrix}
+  \end{equation*}
+
+  It follows that $\mker{A}$ is a basis for $U \cap W$. This can be done with an 
+  arbitrary finite number of subspaces of $\R^n$, as long as their spanning set is 
+  \textit{finite}.
+\end{defn}
