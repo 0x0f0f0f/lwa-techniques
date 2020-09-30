@@ -18,6 +18,7 @@
 \usepackage[table]{xcolor}
 \usepackage{stmaryrd}
 \usepackage{amsfonts}
+\usepackage{lstlistings-golang}
 
 % Code with syntax highlighting
 \usepackage{fancyvrb}
@@ -212,6 +213,7 @@ yield equivalent elements.
   $R'$ such that $R \subseteq R'$ 
 \end{defn}
 
+% TODO linear weighted automata
 \begin{defn}
   \textbf{} \\
   
@@ -236,6 +238,7 @@ The algorithm is defined by the iterative method:
 \begin{eqnarray}
   R_0 = \mker{o}^0, & \quad & R_{i+1} = R_i + \sum_{a \in A} t_a(R_i)^t \label{back} 
 \end{eqnarray}
+Where $\mker{o}^0$ is an annihilator.
 The algorithm stops when $R_{j+1} = R_j$. Proof is available in section 4.2 of \cite{BONCHI201277}
 
 \section{Implementation}
@@ -293,7 +296,7 @@ spanning sets.
 \end{defn}
 
 \begin{defn}
-  \textbf{Algorithm for computing the nullspace} \\
+  \textbf{Algorithm for computing the null space of a vector subspace} \\
   The algorithm implementation can be found in file \texttt{lin/nullspace.go}; it is
   adapted from \cite{scipy/ranknullspace}. 
   Let's consider the singular value decomposition of a matrix $A \in \R^{m \times n}$:
@@ -312,29 +315,55 @@ spanning sets.
 \end{defn}
 
 \begin{exmp}
-  The actual Go implementation is quite verbose, we can show a shorter Python 
+  First, we show a shorter Python 
   implementation of the algorithm to compute the nullspace, using the 
   \textit{SciPy} library \cite{scipy/ranknullspace}:
 
-  \begin{lstlisting}[language=python]
-def nullspace(A, atol=1e-13, rtol=0):
-    A = np.atleast_2d(A)
-    u, s, vh = svd(A)
-    tol = max(atol, rtol * s[0])
-    nnz = (s >= tol).sum()
-    ns = vh[nnz:].conj().T
-    return ns
-    \end{lstlisting}
+  \lstinputlisting[language=python]{nullspace.py}
+
+    The Go implementation is quite longer:
+
+    \lstinputlisting[language=go]{../lin/nullspace.go}
+
 \end{exmp}
 
 
 
 \subsection{Implementing the backwards algorithm}
 
+In \cite{BONCHI201277}, for the first step of the iterative backwards 
+algorithm to compute the largest linear weighted bisimulation, we 
+need to compute $\mker{o}^0$. If $V$ is a vector space and $W$ is a
+subspace of $W$, the annihilator of $W$, respectively $W^0$ is 
+a subspace of the space $V^*$ of linear functionals on $V$.
+$W^0$ are the functionals that annihilate on $W$. Since 
+we are working on subspaces of $\R^n$, we can directly compute 
+the orthogonal complement in our implementation instead of the
+annihilator.
+
+
+\begin{prop}
+  Within finite dimensional spaces, the annihilator $W^0$ is isomorphic
+  to the orthogonal complement.  
+\end{prop}
+
+\begin{proof}
+  Let $V$ be an inner product space over the field $\K$ with an inner product
+  $\langle \cdot , \cdot \rangle : V \times V \to \K$ defined. 
+  With the inner product defined on $V$, every linear functional can be 
+  represented with a vector: if $\xi : V \to \K$ is a functional, $c$ 
+  is an unique vector such that $\forall x \in V \: . \: \langle c, x \rangle = \xi(x)$.
+  The map associating every $\xi \in V^*$ with the vector $c \in V$ that corresponds 
+  to $\xi$ with respect to the inner product is a linear isomorphism. Through this 
+  isomorphism, the annihilator $W^0$ becomes $W^\perp$.
+\end{proof}
+
+
 To compute the orthogonal complement of a vector subspace $W$, we
-compute $W^\perp = \mker{A^T}$, where $A$ is the matrix consisting 
-of the columns in the spanning set of $W$. Precisely, $W$ is the span 
-of the column space of $A$. Proof is available in \cite{ila}.
+compute $W^\perp = \mker{A^T}$, where $A$ is the matrix with 
+column vectors in the spanning set of $W$ as its columns. Precisely, $W$ is 
+represented as the 
+column space of $A$. Proof is available in \cite{ila}.
 
 
 \subsubsection{Headings: third level}

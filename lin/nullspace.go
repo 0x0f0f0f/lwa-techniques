@@ -21,8 +21,6 @@ func Nullspace(a mat.Matrix) (mat.Matrix, float64) {
 	vt := mat.NewDense(1, 1, nil)
 	vt.Reset()
 	svd.VTo(vt)
-	//PrintMat(vt)
-	//fmt.Println(svd.Values(nil))
 
 	// residual
 	res := 0.0
@@ -37,6 +35,7 @@ func Nullspace(a mat.Matrix) (mat.Matrix, float64) {
 		j++
 	}
 
+	// compute the residuum
 	for k := j; k < vt.RawMatrix().Cols; k++ {
 		v := mat.NewVecDense(1, nil)
 		v.Reset()
@@ -50,6 +49,5 @@ func Nullspace(a mat.Matrix) (mat.Matrix, float64) {
 
 	m, n := vt.Dims()
 	ker := vt.Slice(0, m, j, n)
-
 	return ker, res
 }
