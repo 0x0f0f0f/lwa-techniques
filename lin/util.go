@@ -26,7 +26,10 @@ func EyeDense(n int) *mat.Dense {
 	return a
 }
 
-func PrintMat(a mat.Matrix) {
-	fmt.Printf("%.90g\n", mat.Formatted(a, mat.Squeeze()))
+func StringMat(a mat.Matrix) string {
+	return fmt.Sprintf("%.5g", mat.Formatted(a, mat.Squeeze()))
+}
 
+func PrintMat(a mat.Matrix) {
+	fmt.Println(StringMat(a))
 }

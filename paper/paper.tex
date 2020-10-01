@@ -122,10 +122,11 @@ linear partition refinement algorithm, calculates the largest linear weighted bi
 for any given LWA (Linear Weighted Automaton) through an iterative method, 
 the second algorithm checks the language equivalence 
 of two vectors (states) for a given weighted automata by using an additional
-data structure representing a congruence relationship between states.
-We then compare the two algorithms results to verify their correctness
-on randomly generated automata samples, and provide some runtime statistics.
-
+data structure representing a congruence relation between states.
+We then compare results of the two algorithms to verify their correctness
+and performance on randomly generated samples. 
+We finally provide comparison of runtime statistics and suggest 
+which of the two algorithm is a the best choice for some usage cases.
 \end{abstract}
 
 
@@ -259,7 +260,7 @@ We define $\llwb$ as the behavioral equivalence for a given LWA $(V, o, t)$ as
 
 \begin{lem}
   $\llwb$ coincides with $\sim_l$: 
-  
+
   Let $(X, o, t)$ be a WA and $(\K^X, o^\sharp, t^\sharp)$ the corresponding linear 
   weighted automaton. Then $\forall x \in X, \;\; \sqmap{x} = \langlwa{x}{\K^X}$
 \end{lem}
@@ -288,7 +289,7 @@ We now recall the backwards algorithm for computing $\llwb$ defined in \cite{BON
 
 The algorithm is defined by the iterative method:
 \begin{eqnarray}
-  R_0 = \mker{o}^0, & \quad & R_{i+1} = R_i + \sum_{a \in A} t_a(R_i)^t \label{back} 
+  R_0 = \mker{o}^0, & \quad & R_{i+1} = R_i + \sum_{a \in A} t_a^t(R_i) \label{back} 
 \end{eqnarray}
 Where $\mker{o}^0$ is an annihilator.
 The algorithm stops when $R_{j+1} = R_j$. Proof is available in section 4.2 of \cite{BONCHI201277}

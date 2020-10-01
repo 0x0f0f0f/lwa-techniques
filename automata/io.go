@@ -110,6 +110,7 @@ func ReadAutomaton(r io.Reader, prompt bool) (*Automaton, error) {
 	if err != nil {
 		return nil, err
 	}
+	a.Dim = numStates
 
 	// Read the output vector
 	if prompt {
@@ -153,12 +154,12 @@ func (a Automaton) FancyString() string {
 
 	// Print the output vector
 	fo := mat.Formatted(a.O, mat.Prefix("      "), mat.Squeeze())
-	buf.WriteString(fmt.Sprintf("o = %v\n\n", fo))
+	buf.WriteString(fmt.Sprintf("o = %.5g\n\n", fo))
 
 	// Print the matrices
 	for sym, m := range a.T {
 		fo := mat.Formatted(m, mat.Prefix("      "), mat.Squeeze())
-		buf.WriteString(fmt.Sprintf("T_%s = %v\n\n", sym, fo))
+		buf.WriteString(fmt.Sprintf("T_%s = %.5g\n\n", sym, fo))
 	}
 
 	return buf.String()
@@ -174,12 +175,12 @@ func (a Automaton) String() string {
 
 	// Print the output vector
 	fo := mat.Formatted(a.O, mat.Squeeze(), mat.FormatMATLAB())
-	buf.WriteString(fmt.Sprintf("o = %v\n\n", fo))
+	buf.WriteString(fmt.Sprintf("o = %.5g\n\n", fo))
 
 	// Print the matrices
 	for sym, m := range a.T {
 		fo := mat.Formatted(m, mat.Prefix("      "), mat.Squeeze())
-		buf.WriteString(fmt.Sprintf("T_%s = %v\n\n", sym, fo))
+		buf.WriteString(fmt.Sprintf("T_%s = %.5g\n\n", sym, fo))
 	}
 
 	return buf.String()

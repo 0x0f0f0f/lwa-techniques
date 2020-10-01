@@ -13,7 +13,7 @@ const tol = 10e-13
 // for the nullspace of matrix a, computed
 // through svd decomposition. also returns the maximum residual
 func Nullspace(a mat.Matrix) (mat.Matrix, float64) {
-	// compute svd decomposition
+	// compute svd decomposition  O(n^3)
 	var svd mat.SVD
 	if ok := svd.Factorize(a, mat.SVDFullV); !ok {
 		log.Fatal("failed to factorize A")
@@ -48,6 +48,7 @@ func Nullspace(a mat.Matrix) (mat.Matrix, float64) {
 	}
 
 	m, n := vt.Dims()
+	//fmt.Println(m, n, j)
 	ker := vt.Slice(0, m, j, n)
 	return ker, res
 }
