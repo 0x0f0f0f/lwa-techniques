@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"math/rand"
+	"time"
 
 	"github.com/0x0f0f0f/lwa-techniques/automata"
+	"github.com/0x0f0f0f/lwa-techniques/lin"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -14,31 +16,47 @@ func check(err error) {
 	}
 }
 
+func randTest(dim, numSyms, numSamples int) bool {
+	az := automata.RandAutomaton(numSyms, dim)
+
+	az.BackwardsPartitionRefinement()
+
+	if mat.Equal(az.LLWB, mat.NewDense(dim, 1, nil)) {
+		return false
+	}
+
+	fmt.Println(az)
+	lin.PrintMat(az.LLWB)
+	_, dimLLWB := az.LLWB.Dims()
+
+	samples := make([]*mat.VecDense, numSamples)
+	for i := range samples {
+		samples[i] = lin.LinearCombination(az.LLWB, lin.RandVec(dimLLWB))
+	}
+
+	for i := range samples {
+		j := rand.Intn(numSamples)
+		for j == i {
+			j = rand.Intn(numSamples)
+		}
+		resBPR := az.BPREquivalence(samples[i], samples[j])
+		resHKC, _ := az.HKC(samples[i], samples[j])
+
+		if resBPR == resHKC {
+			fmt.Println(resBPR, resHKC)
+			lin.PrintMat(samples[i])
+			lin.PrintMat(samples[j])
+		}
+	}
+	return false
+}
+
 func main() {
-	/* 		v1 := mat.NewVecDense(3, []float64{1.0, 2.0, 3.0})
-	   	v2 := mat.NewVecDense(3, []float64{3.0, 2.0, 1.0})
-	   	p1, err := aut.NewPair(v1, v2)
-	   	check(err)
+	//defer profile.Start(profile.MemProfile).Stop()
 
-	   	v3 := mat.NewVecDense(3, []float64{4.0, 3.0, 5.0})
-	   	v4 := mat.NewVecDense(3, []float64{6.0, 3.0, 3.0})
-	   	p2, err := aut.NewPair(v3, v4)
-	   	check(err)
+	rand.Seed(time.Now().UnixNano())
 
-	r := aut.NewRelation()
-	r.Add(p1)
-
-	fmt.Println(r.PairIsInCongruenceClosure(p2))
-	*/
-
-	a, err := automata.ReadAutomaton(os.Stdin, true)
-	check(err)
-	fmt.Println(a.String())
-
-	v1 := mat.NewVecDense(3, []float64{0, 1, 0})
-	v2 := mat.NewVecDense(3, []float64{0, 0, 1})
-
-	res, err := a.HKC(v1, v2)
-	fmt.Println(res, err)
-
+	for i := 0; i < 100; i++ {
+		randTest(3, 1, 10)
+	}
 }

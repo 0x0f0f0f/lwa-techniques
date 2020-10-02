@@ -48,7 +48,9 @@ func Nullspace(a mat.Matrix) (mat.Matrix, float64) {
 	}
 
 	m, n := vt.Dims()
-	//fmt.Println(m, n, j)
+	if n == j {
+		return ZeroDense(m, 1), 0
+	}
 	ker := vt.Slice(0, m, j, n)
 	return ker, res
 }

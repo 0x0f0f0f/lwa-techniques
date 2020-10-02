@@ -34,3 +34,35 @@ spanning sets.
   arbitrary finite number of subspaces of $\R^n$, as long as their spanning set is 
   \textit{finite}.
 \end{defn}
+
+\begin{defn}
+  \textbf{Algorithm for computing the null space of a vector subspace} \\
+  The algorithm implementation can be found in file \texttt{lin/nullspace.go}; it is
+  adapted from \cite{scipy/ranknullspace}. 
+  Let's consider the singular value decomposition of a matrix $A \in \R^{m \times n}$:
+
+  \begin{equation*}
+    \begin{aligned}
+      A = U \Sigma V^T & \quad & \Sigma = \diag{\sigma_1, \sigma_2, \hdots, \sigma_{\min(m, n)}  } 
+       & \quad &  U \in \R^{m \times m} & \quad & V \in \R^{n \times n}
+    \end{aligned}
+  \end{equation*}
+
+  Where $V$ and $U$ are orthogonal and the singular values are ordered: $\sigma_1 \geq \sigma_2 \geq \hdots \geq \sigma_{\min(m,n)} \geq 0$.
+  It follows that $\mrank{A}$ is equal to the number of nonzero singular values and
+  a basis of the (right) null space of $A$ is the spanning set of the columns of V
+  corresponding to singular values equal to zero. 
+\end{defn}
+
+\begin{exmp}
+  First, we show a shorter Python 
+  implementation of the algorithm to compute the nullspace, using the 
+  \textit{SciPy} library \cite{scipy/ranknullspace}:
+
+  \lstinputlisting[language=python]{nullspace.py}
+
+    The Go implementation is quite longer:
+
+    \lstinputlisting[language=go]{../lin/nullspace.go}
+
+\end{exmp}

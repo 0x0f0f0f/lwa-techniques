@@ -266,21 +266,22 @@ We define $\llwb$ as the behavioral equivalence for a given LWA $(V, o, t)$ as
 \end{lem}
 
 \begin{proof}
-  Proved in section 3.2 of \cite{BONCHI201277}
+  Proved in section 3.3 of \cite{BONCHI201277}
 \end{proof}
 
+Language equivalence can be expressed in terms of linear weighted bisimulations (LWBs for short).
+Differently from weighted bisimulations, LWBs can be seen both as relations and as subspaces.
+The subspace representation of LWBs is used in the backwards partition refinement algorithm 
+implemented in \cite{BONCHI201277} and in this work.
 
 %=========================================================================
 
 
-
-
-
 \section{The Problem}
-In this work, we  
-
+We want to check if two vectors are language equivalent $v_1 \sim_l v_2$.
 
 \section{Algorithms}
+
 
 We now recall the backwards algorithm for computing $\llwb$ defined in \cite{BONCHI201277}.
 
@@ -292,7 +293,10 @@ The algorithm is defined by the iterative method:
   R_0 = \mker{o}^0, & \quad & R_{i+1} = R_i + \sum_{a \in A} t_a^t(R_i) \label{back} 
 \end{eqnarray}
 Where $\mker{o}^0$ is an annihilator.
-The algorithm stops when $R_{j+1} = R_j$. Proof is available in section 4.2 of \cite{BONCHI201277}
+The algorithm stops when $R_{j+1} = R_j$. An index $j \leq \dim(V)$ is 
+guaranteed to exist, such that the algorithms terminates at step $j$.
+It follows that $\llwb \equiv R_j^0$.
+Proof is available in section 4.2 of \cite{BONCHI201277}
 
 
 
@@ -316,51 +320,45 @@ Real numbers are implemented with double precision floating point numbers,
 known as the \texttt{float64} type in the Go programming language.
 
 
-
-
-See Section \ref{sec:headings}.
-
-
-
 \begin{defn}
-  \textbf{Algorithm for computing the null space of a vector subspace} \\
-  The algorithm implementation can be found in file \texttt{lin/nullspace.go}; it is
-  adapted from \cite{scipy/ranknullspace}. 
+  \textbf{Applications of SVD} \\
+
   Let's consider the singular value decomposition of a matrix $A \in \R^{m \times n}$:
 
   \begin{equation*}
     \begin{aligned}
-      A = U \Sigma V^T & \quad & \Sigma = \diag{\sigma_1, \sigma_2, \hdots, \sigma_{\min(m, n)}  } 
+      A = U \Sigma V^T & \quad & \Sigma = \diag{\sigma_1, \sigma_2, \hdots, \sigma_r  } 
        & \quad &  U \in \R^{m \times m} & \quad & V \in \R^{n \times n}
     \end{aligned}
   \end{equation*}
 
-  Where $V$ and $U$ are orthogonal and the singular values are ordered: $\sigma_1 \geq \sigma_2 \geq \hdots \geq \sigma_{\min(m,n)} \geq 0$.
-  It follows that $\mrank{A}$ is equal to the number of nonzero singular values and
-  a basis of the (right) null space of $A$ is the spanning set of the columns of V
-  corresponding to singular values equal to zero. 
+  Where $V$ and $U$ are orthogonal and the singular values are ordered: $\sigma_1 \geq \sigma_2 \geq \hdots \geq \sigma_r \geq 0$.
+  It follows that $\mrank{A}$ is equal to the number of nonzero singular values, and
+  as explained in \cite{svd}:
+  
+  \begin{enumerate}
+    \item  $\mrank{A} = \mrank{\Sigma} = r$
+    \item The column space of $A$ is spanned by the first $r$ columns of $U$.
+    \item The null space of $A$ is spanned by the last $n − r$ columns of $V$.
+    \item The row space of $A$ is spanned by the first $r$ columns of $V$.
+    \item The null space of $A^T$ is spanned by the last $m − r$ columns of $U$.
+  \end{enumerate}
+  
+  Of our interest, are only the computation of the null space and columns space.
+  The implementation, applying SVD, 
+  can be found in files \texttt{lin/colspace.go} and \texttt{lin/nullspace.go}.
 \end{defn}
 
-\begin{exmp}
-  First, we show a shorter Python 
-  implementation of the algorithm to compute the nullspace, using the 
-  \textit{SciPy} library \cite{scipy/ranknullspace}:
-
-  \lstinputlisting[language=python]{nullspace.py}
-
-    The Go implementation is quite longer:
-
-    \lstinputlisting[language=go]{../lin/nullspace.go}
-
-\end{exmp}
 
 
 
-\subsection{Implementing the backwards algorithm}
 
-In \cite{BONCHI201277}, for the first step of the iterative backwards 
-algorithm to compute the largest linear weighted bisimulation, we 
-need to compute $\mker{o}^0$. If $V$ is a vector space and $W$ is a
+
+\subsection{Implementing the backwards partition refinement algorithm}
+
+To compute $\llwb$ at the last step of the algorithm,
+we need to compute $R_j^0$.
+If $V$ is a vector space and $W$ is a
 subspace of $W$, the annihilator of $W$, respectively $W^0$ is 
 a subspace of the space $V^*$ of linear functionals on $V$.
 $W^0$ are the functionals that annihilate on $W$. Since 
@@ -398,40 +396,8 @@ represented as the
 column space of $A$. Proof is available in \cite{ila}.
 
 
+%=============================================================
 
-\subsubsection{Headings: third level}
-
-\paragraph{Paragraph}
-
-
-
-
-\section{Examples of citations, figures, tables, references}
-\label{sec:others}
-
-\cite{kour2014real,kour2014fast} and see \cite{hadash2018estimate}.
-
-The documentation for \verb+natbib+ may be found at
-\begin{center}
-  \url{http://mirrors.ctan.org/macros/latex/contrib/natbib/natnotes.pdf}
-\end{center}
-Of note is the command \verb+\citet+, which produces citations
-appropriate for use in inline text.  For example,
-\begin{verbatim}
-   \citet{hasselmo} investigated\dots
-\end{verbatim}
-produces
-\begin{quote}
-  Hasselmo, et al.\ (1995) investigated\dots
-\end{quote}
-
-\begin{center}
-  \url{https://www.ctan.org/pkg/booktabs}
-\end{center}
-
-
-\subsection{Figures}
-See Figure \ref{fig:fig1}. Here is how you add footnotes. \footnote{Sample of the first footnote.}
 
 \begin{figure}
   \centering
@@ -440,8 +406,6 @@ See Figure \ref{fig:fig1}. Here is how you add footnotes. \footnote{Sample of th
   \label{fig:fig1}
 \end{figure}
 
-\subsection{Tables}
-See awesome Table~\ref{tab:table}.
 
 \begin{table}
  \caption{Sample table title}

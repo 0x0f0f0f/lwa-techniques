@@ -17,11 +17,11 @@ Michele Boreale.
 \newblock In {\em International Conference on Concurrency Theory}, pages
   163--177. Springer, 2009.
 
-\bibitem{scipy/ranknullspace}
-Open~Source Community.
-\newblock Scipy cookbook: Rank and nullspace of a matrix, 2011.
+\bibitem{svd}
+Yan-Bin Jia.
+\newblock Singular value decomposition.
 \newblock Available online at
-  \url{https://scipy-cookbook.readthedocs.io/items/RankNullspace.html}.
+  \url{http://web.cs.iastate.edu/~cs577/handouts/svd.pdf}.
 
 \bibitem{ila}
 Dan Margalit and Joseph Rabinoff.
