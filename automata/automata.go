@@ -4,6 +4,7 @@ package automata
 
 import (
 	"errors"
+	"math"
 	"math/rand"
 
 	"github.com/0x0f0f0f/lwa-techniques/lin"
@@ -17,15 +18,16 @@ import (
 func errRead(msg string) error { return errors.New("could not read automaton:" + msg) }
 
 type Automaton struct {
-	A        []string              // The input alphabet
-	T        map[string]*mat.Dense // Transition matrices are maps from input strings to dense real valued matrices
-	O        *mat.VecDense         // Output vector uses a dense real valued vector
-	Dim      int                   // Number of states/dimension of vector space V in LWA
-	LLWB     *mat.Dense            // Col(LLWB) is a basis of the largest linear weighted bisimulation, a binary linear relation. vRw iff (v-w) in Ker(R)
+	A   []string              // The input alphabet
+	T   map[string]*mat.Dense // Transition matrices are maps from input strings to dense real valued matrices
+	O   *mat.VecDense         // Output vector uses a dense real valued vector
+	Dim int                   // Number of states/dimension of vector space V in LWA
+	//LLWB     *mat.Dense            // Col(LLWB) is a basis of the largest linear weighted bisimulation, a binary linear relation. vRw iff (v-w) in Ker(R)
 	LLWBperp *mat.Dense
+	Tol      float64 // if abs(something) < tol, something is interpreted as 0
 }
 
-func RandAutomaton(syms, states int) Automaton {
+func RandAutomaton(syms, states, maxweight int, tol float64) Automaton {
 	// create the alphabet
 	A := make([]string, syms)
 	if syms <= 57 {
@@ -36,7 +38,7 @@ func RandAutomaton(syms, states int) Automaton {
 
 	T := map[string]*mat.Dense{}
 	for _, sym := range A {
-		T[sym] = lin.RandIntDense(states, 2)
+		T[sym] = lin.RandIntDense(states, maxweight)
 		lin.PokeHoles(T[sym], rand.Intn((states*states)/2))
 	}
 
@@ -45,6 +47,7 @@ func RandAutomaton(syms, states int) Automaton {
 		T:   T,
 		O:   lin.RandVec(states),
 		Dim: states,
+		Tol: tol,
 	}
 
 	return aut
@@ -52,7 +55,11 @@ func RandAutomaton(syms, states int) Automaton {
 
 // applies the output function to a given state vector (o * v)
 func (a Automaton) GetOutput(v *mat.VecDense) float64 {
-	return mat.Dot(a.O, v)
+	res := mat.Dot(a.O, v)
+	if math.Abs(res) < a.Tol {
+		res = 0.0
+	}
+	return res
 }
 
 func (a Automaton) ApplyTransition(s string, v *mat.VecDense) *mat.VecDense {

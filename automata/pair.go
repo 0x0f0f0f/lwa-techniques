@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/0x0f0f0f/lwa-techniques/lin"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -25,13 +26,13 @@ func NewPair(l, r *mat.VecDense) (*Pair, error) {
 }
 
 // Returns true if two pairs equal each other
-func (p Pair) Eqs(p1 *Pair) bool {
+func (p Pair) Eqs(p1 *Pair, tol float64) bool {
 	// if the dimensions do not match, pairs are not equal
 	if p.Dim != p1.Dim {
 		return false
 	}
-	eql := mat.Equal(p.Left, p1.Left) && mat.Equal(p.Right, p1.Right)
-	eqr := mat.Equal(p.Left, p1.Right) && mat.Equal(p.Right, p1.Left)
+	eql := lin.EqVecTol(p.Left, p1.Left, tol) && lin.EqVecTol(p.Right, p1.Right, tol)
+	eqr := lin.EqVecTol(p.Left, p1.Right, tol) && lin.EqVecTol(p.Right, p1.Left, tol)
 
 	return eql || eqr
 }
@@ -40,5 +41,5 @@ func (p Pair) String() string {
 	fl := mat.Formatted(p.Left, mat.FormatMATLAB())
 	fr := mat.Formatted(p.Right, mat.FormatMATLAB())
 
-	return fmt.Sprintf("(%.5g, %.5g)", fl, fr)
+	return fmt.Sprintf("(%.20g, %.20g)", fl, fr)
 }

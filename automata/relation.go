@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/0x0f0f0f/lwa-techniques/lin"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -11,19 +12,20 @@ import (
 // the relation is a congruence if it is an equivalence
 // and is closed under linear combinations.
 type Relation struct {
-	s []*Pair         // the set of pairs in the relations
-	u []*mat.VecDense // generating set for the congruence closure
+	s   []*Pair         // the set of pairs in the relations
+	u   []*mat.VecDense // generating set for the congruence closure
+	tol float64
 }
 
 // creates a new empty relation
-func NewRelation() Relation {
-	return Relation{}
+func NewRelation(tol float64) Relation {
+	return Relation{tol: tol}
 }
 
 // returns true if the relation contains the pair of vectors. O(n)
 func (r Relation) Has(p *Pair) bool {
 	for _, v := range r.s {
-		if v.Eqs(p) {
+		if v.Eqs(p, r.tol) {
 			return true
 		}
 	}
@@ -45,7 +47,7 @@ func (r *Relation) Add(p *Pair) {
 	// add the subtraction result to the closure generating set
 	subInU := false
 	for _, v := range r.u {
-		if mat.Equal(v, sub) {
+		if lin.EqVecTol(v, sub, r.tol) {
 			subInU = true
 		}
 	}
@@ -62,7 +64,7 @@ func (r Relation) PairIsInCongruenceClosure(p *Pair) bool {
 
 	// (v, v') ∈ c(R) iff v - v' ∈ U_R
 	for _, v := range r.u {
-		if mat.Equal(v, sub) {
+		if lin.EqVecTol(v, sub, r.tol) {
 			return true
 		}
 	}

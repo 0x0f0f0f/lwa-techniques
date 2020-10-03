@@ -27,17 +27,18 @@ func TestBackwardsPartitionRefinement(t *testing.T) {
 		},
 		Dim: 3,
 		O:   mat.NewVecDense(3, []float64{2, 1, 1}),
+		Tol: 10e-14,
 	}
 
 	a.BackwardsPartitionRefinement()
-	lin.PrintMat(a.LLWB)
+	//lin.PrintMat(a.LLWBperp)
 
 	v1 := mat.NewVecDense(3, []float64{1, 0, 0})
 	v2 := mat.NewVecDense(3, []float64{0, 1.5, 0.5})
 
 	// confront BPR and HKC results
 	resBPR := a.BPREquivalence(v1, v2)
-	resHKC, _ := a.HKC(v1, v2)
+	resHKC, _ := a.HKC(v1, v2, 3000)
 	fmt.Println(resBPR, resHKC)
 	assert.Equal(t, resHKC, resBPR)
 
@@ -45,7 +46,7 @@ func TestBackwardsPartitionRefinement(t *testing.T) {
 	v2 = mat.NewVecDense(3, []float64{2, 4, 0.5})
 
 	resBPR = a.BPREquivalence(v1, v2)
-	resHKC, _ = a.HKC(v1, v2)
+	resHKC, _ = a.HKC(v1, v2, 3000)
 	fmt.Println(resBPR, resHKC)
 	assert.Equal(t, resHKC, resBPR)
 
@@ -64,17 +65,18 @@ func TestBackwardsPartitionRefinement2(t *testing.T) {
 		},
 		Dim: 3,
 		O:   mat.NewVecDense(3, []float64{1, 1, 1}),
+		Tol: 10e-14,
 	}
 
 	a.BackwardsPartitionRefinement()
-	lin.PrintMat(a.LLWB)
+	lin.PrintMat(a.LLWBperp)
 
 	v1 := mat.NewVecDense(3, []float64{1, 0, 0})
 	v2 := mat.NewVecDense(3, []float64{1, 1, -1})
 
 	// confront BPR and HKC results
 	resBPR := a.BPREquivalence(v1, v2)
-	resHKC, _ := a.HKC(v1, v2)
+	resHKC, _ := a.HKC(v1, v2, 3000)
 	fmt.Println(resBPR, resHKC)
 	assert.Equal(t, resHKC, resBPR)
 
@@ -83,7 +85,7 @@ func TestBackwardsPartitionRefinement2(t *testing.T) {
 
 	// confront BPR and HKC results
 	resBPR = a.BPREquivalence(v1, v2)
-	resHKC, _ = a.HKC(v1, v2)
+	resHKC, _ = a.HKC(v1, v2, 3000)
 	fmt.Println(resBPR, resHKC)
 	assert.Equal(t, resHKC, resBPR)
 

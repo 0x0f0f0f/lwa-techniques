@@ -3,6 +3,7 @@ package lin
 import (
 	"errors"
 	"fmt"
+	"math"
 	"math/rand"
 
 	"gonum.org/v1/gonum/mat"
@@ -17,6 +18,25 @@ func IsZero(vec *mat.VecDense) bool {
 	}
 
 	return true
+}
+
+// returns true if a vector is composed only of zero values, with a tolerance of tol
+func IsZeroTol(vec *mat.VecDense, tol float64) bool {
+	for _, el := range vec.RawVector().Data {
+		if math.Abs(el) > tol {
+			return false
+		}
+	}
+
+	return true
+}
+
+// returns true if two vectors are equal with a tolerance of tol
+func EqVecTol(a, b *mat.VecDense, tol float64) bool {
+	sub := mat.VecDenseCopyOf(a)
+	sub.SubVec(a, b)
+
+	return IsZeroTol(sub, tol)
 }
 
 // create an n*n identity matrix
@@ -109,7 +129,7 @@ func CleanTolDense(a *mat.Dense, tol float64) {
 	m, n := a.Dims()
 	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
-			if a.At(i, j) < tol {
+			if math.Abs(a.At(i, j)) < tol {
 				a.Set(i, j, 0)
 			}
 		}

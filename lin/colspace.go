@@ -8,7 +8,7 @@ import (
 
 // compute an orthonormal basis of the column space of a through
 // svd decomposition. Cost is O(n^3)
-func OrthonormalColumnSpaceBasis(a mat.Matrix) mat.Matrix {
+func OrthonormalColumnSpaceBasis(a mat.Matrix, tol float64) mat.Matrix {
 	var svd mat.SVD
 	if ok := svd.Factorize(a, mat.SVDFullU); !ok {
 		log.Fatal("failed to factorize A")

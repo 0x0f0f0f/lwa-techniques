@@ -35,7 +35,7 @@ func (a *Automaton) BackwardsPartitionRefinement() {
 			// fmt.Println("curr basis = ")
 			// lin.PrintMat(currBasis)
 
-			currBasis = lin.OrthonormalColumnSpaceBasis(currBasis).(*mat.Dense)
+			currBasis = lin.OrthonormalColumnSpaceBasis(currBasis, a.Tol).(*mat.Dense)
 			// fmt.Printf("orthonormal basis of col space of b = \n%s\n", lin.StringMat(currBasis))
 		}
 
@@ -46,16 +46,15 @@ func (a *Automaton) BackwardsPartitionRefinement() {
 		// _, currSize := currBasis.Dims()
 		// fmt.Printf("B_%d has size %d \n", i-1, lastIndex)
 		// fmt.Printf("B_%d has size %d \n", i, currSize)
-		lin.CleanTolDense(currBasis, 10e-12)
 		lastBasis = currBasis
 	}
 
 	a.LLWBperp = currBasis
-	a.LLWB = lin.Complement(currBasis).(*mat.Dense)
+	//a.LLWB = lin.Complement(currBasis).(*mat.Dense)
 }
 
 func (a Automaton) BPREquivalence(v1, v2 *mat.VecDense) bool {
-	if a.LLWB == nil {
+	if a.LLWBperp == nil {
 		log.Fatalln("largest linear weighted bisimulation not computed for automaton")
 		return false
 	}
@@ -63,5 +62,9 @@ func (a Automaton) BPREquivalence(v1, v2 *mat.VecDense) bool {
 	sub := mat.VecDenseCopyOf(v1)
 	sub.SubVec(v1, v2)
 
-	return lin.InSubspace(a.LLWB, sub)
+	mul := mat.VecDenseCopyOf(sub)
+	mul.Reset()
+	mul.MulVec(a.LLWBperp.T(), sub)
+
+	return lin.IsZeroTol(mul, a.Tol)
 }

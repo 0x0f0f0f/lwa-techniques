@@ -7,12 +7,10 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-const tol = 10e-13
-
 // columns of the returned matrix form an orthonormal basis
 // for the nullspace of matrix a, computed
 // through svd decomposition. also returns the maximum residual
-func Nullspace(a mat.Matrix) (mat.Matrix, float64) {
+func Nullspace(a mat.Matrix, tol float64) (mat.Matrix, float64) {
 	// compute svd decomposition  O(n^3)
 	var svd mat.SVD
 	if ok := svd.Factorize(a, mat.SVDFullV); !ok {

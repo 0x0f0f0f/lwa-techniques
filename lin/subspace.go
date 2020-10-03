@@ -6,7 +6,7 @@ import (
 
 // returns true iff the vector b is included in U's column space
 // to do so we check if the matrix U and [U|b] have the same rank
-func InSubspace(u *mat.Dense, b *mat.VecDense) bool {
+func InSubspace(u *mat.Dense, b *mat.VecDense, tol float64) bool {
 	var svd mat.SVD
 	svd.Factorize(u, mat.SVDNone)
 
@@ -25,7 +25,7 @@ func InSubspace(u *mat.Dense, b *mat.VecDense) bool {
 }
 
 // compute a basis for the intersection of many vector spaces
-func Intersect(spansets ...mat.Matrix) mat.Matrix {
+func Intersect(tol float64, spansets ...mat.Matrix) mat.Matrix {
 	a := mat.DenseCopyOf(spansets[0])
 	for i, span := range spansets {
 		if i == 0 {
@@ -39,7 +39,7 @@ func Intersect(spansets ...mat.Matrix) mat.Matrix {
 		a = m
 	}
 	// compute the nullspace
-	ker, _ := Nullspace(a)
+	ker, _ := Nullspace(a, tol)
 	return ker
 }
 
@@ -63,14 +63,14 @@ func Union(spansets ...*mat.Dense) *mat.Dense {
 }
 
 // compute the orthogonal complement of a vector subspace of R^n
-func Complement(spanset mat.Matrix) mat.Matrix {
+func Complement(spanset mat.Matrix, tol float64) mat.Matrix {
 	n, m := spanset.Dims()
 	// the orthogonal complement of {} is R^n
 	if m == 0 {
 		return EyeDense(n)
 	}
 
-	basis, _ := Nullspace(spanset.T())
+	basis, _ := Nullspace(spanset.T(), tol)
 
 	return basis
 }

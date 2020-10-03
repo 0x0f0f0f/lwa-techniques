@@ -8,7 +8,7 @@ import (
 
 // find which column vectors in m are linearly independent and
 // return them
-func Independent(a *mat.Dense) *mat.Dense {
+func Independent(a *mat.Dense, tol float64) *mat.Dense {
 	var qr mat.QR
 	qr.Factorize(a)
 	m, n := a.Dims()
@@ -40,7 +40,7 @@ func Independent(a *mat.Dense) *mat.Dense {
 
 // find which column vectors in m are linearly independent and
 // return them
-func IndependentGauss(a *mat.Dense) *mat.Dense {
+func IndependentGauss(a *mat.Dense, tol float64) *mat.Dense {
 	m, n := a.Dims()
 	ab := a.Grow(0, 1)
 
