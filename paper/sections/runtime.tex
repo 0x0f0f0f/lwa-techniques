@@ -1,0 +1,44 @@
+\section{Runtime Results}
+
+TODO da fare e sistemare.
+
+The program was executed on an x86\_64 AMD Ryzen 5 2600X Six Core CPU, running at 3.6GHz with 32GB RAM, 
+running Void Linux. 
+For 3 test runs on 100000 automata composed of 4 states, 2 alphabet symbols and transition
+matrices with weights on natural numbers $\leq 3$, with a tolerance of 10e-14,
+we found a non empty kernel of $\llwb$ for an average of 1718 automata.
+
+%TODO
+(TODO spiega: più aumentano i simboli/stati più si riduce la probabilità di 
+trovare $\llwb$ non vuoto?? investiga, trova un modo di generare automi con LLWB 
+non vuoto)
+
+By generating 1000 random couples of language equivalent vectors $(v_1, v_2)$ such that
+$(v_1 - v_2) \in \mker{\llwb}$ and 1000 couples of completely random vectors
+$(w_1, w_2)$, for each automata, we verified with 100\% confidence that:
+
+\begin{center}
+    $v_1 \; R_j \; v_2 \iff$ \texttt{HKC}$(v_1, v_2) =$ \texttt{false}
+\end{center}
+
+Where $R_j$ is the largest linear weighted bisimulation $\llwb$ computed by \texttt{BPR}.
+
+%TODO
+
+Sample output (19992 KBs in memory):
+\begin{verbatim}
+    $ time go run main.go 
+    tests completed            100000...
+    
+    1000 samples per automaton
+    100000 automata
+    LLWP is not empty for 1726 automata
+    language equivalence HKC = BPR for 3452000 samples
+    BPR equivalence verified for 1726000 samples
+    HKC equivalence verified for 1726000 samples
+    confidence is 100%
+    
+    real    0m21.322s
+    user    0m23.614s
+    sys     0m0.961s
+\end{verbatim}

@@ -1,0 +1,157 @@
+\section{Implementation}
+\label{sec:impl}
+
+The algorithms and data structures are implemented in the Go programming 
+language. Real numbers are implemented with double precision floating point numbers,  
+precisely of \texttt{float64} type.
+
+This implementation makes use of the Gonum library, 
+an excellent toolkit for high-performance numerical computations.
+We only import the Gonum libraries for matrices, linear algebra 
+and visual plotting.
+Although not GPU accelerated, Gonum matrix operations are run on 
+the CPU and accelerated with BLAS and LAPACK.
+
+
+\subsection{Data Structures}
+In this implementation, the data structure for representing weighted automata is a \texttt{struct} containing
+the following attributes:
+\begin{enumerate}
+    \item An integer \texttt{Dim} representing the number of states $n$. 
+    (note: states are finite and indexed on natural numbers $0, \hdots, n-1$)
+    \item A slice of strings representing the \textit{alphabet} $A$.
+    \item A map of strings as keys (the alphabet symbols) and dense $n \times n$ \texttt{float64} matrices as values,
+    representing the set of transition functions.
+    \item A dense \texttt{float64} vector, representing the linearization of the output function. 
+    \item A \texttt{float64} value representing the tolerance to be used in numerical computations.
+    \item An optionally \texttt{nil}, dense floating point matrix providing a basis for the orthogonal 
+    complement of $\llwb$
+\end{enumerate}
+\begin{note}
+    \textit{Slices} in Go are a convenient and efficient extension of the concept of arrays: 
+    they provide an abstraction for indexed, variable length sequences of typed data, and 
+    provide useful helper functions for creating, appending and selecting elements. 
+\end{note}
+The definition can be found in file \texttt{automata/automata.go}.
+We then provide methods for reading an automaton from a text stream, applying transition
+and output functions to vectors, and generating random automata with real and natural valued weights.
+
+
+\subsection{Implementation of HKC}
+Instead of creating dedicated structs,
+we exploit the \texttt{mat.Dense} data type in Gonum to efficiently represent:
+\begin{itemize}
+    \item Sets of vectors with $n \times k$ dense matrices ($k$ is the number of vectors in the set)
+    \item Pairs of vectors with $n \times 2$ dense matrices
+    \item Sets and the "\texttt{todo}" stack of pairs with $n \times 2k$ dense matrices ($k$ is the number of pairs in the set or stack)
+\end{itemize}
+
+To increase efficiency of the methods for inclusion checking and insertion in sets of vectors,
+one could keep the columns ordered (by vector norm) in the corresponding matrix. 
+
+To represent the congruence relation $R$, we introduce a \texttt{struct} containing:
+\begin{itemize}
+    \item A dense matrix \texttt{s} of size $n \times 2k$ containing the set of pairs in the relation
+    \item A dense matrix \texttt{u} to represent the generating set $U_R$ for the congruence closure (see definition \ref{def:congclos}).
+    \item Two integers representing the number of pairs in the set, and the size of vectors.
+    \item A tolerance value to be used in equivalence checks. Best results were obtained with $10^{-14}$.
+\end{itemize}
+
+When adding a pair of vectors to the congruence relation, we extend the columns
+of the matrix \texttt{s} with the pair $(v_1, v_2)$, if and only if $(v_1 - v_2)$ 
+is not already in $U$. To check if the pair is in the congruence closure $c(R)$, 
+we check if $(v_1 - v_2)$ is contained in U.
+
+\captionof{figure}{Implementation of the \texttt{HKC}$(v_1,v_2)$ procedure}
+\lstinputlisting[language=go]{../automata/hkc.go}
+
+
+%TODO sistema
+
+\subsection{Implementation of BPR}
+Given a WA $L$, at the first step of \texttt{BPR}, we set $R_0 = o$, 
+with $o$ being the dense vector representing the output function 
+of $L$, as seen in \cite{BONCHI201277}.
+For each step $i = 0, \hdots, j+1$, with $j \leq \dim(L)$, the implemented algorithm:
+\begin{enumerate}
+    \item For each $a \in A$ computes $t_a^T(R_i)$ through matrix multiplication
+    \item Concatenates those matrices $t_a^T(R_i)$ to $R_i$ in a resulting matrix $G$ 
+    \item Instead of checking linear independence of the columns through Gaussian elimination,
+    it computes $R_{i+1}$ as the orthonormal basis of the column space of $G$, through singular 
+    value decomposition.
+\end{enumerate}
+
+At the end of \texttt{BPR}, we store the basis for the orthogonal complement
+of $\llwb$ as an attribute of the automaton. To check if two vectors $v_1 \llwb v_2$,
+we check that $R_j^T(v_1 - v_2) = \vec{0}$, with a prefixed tolerance.
+
+
+To compute a basis for $\llwb$, at the last step of the algorithm,
+we would need to compute $R_j^0$.
+If $V$ is a vector space and $W$ is a
+subspace of $W$, the annihilator of $W$, respectively $W^0$ is 
+a subspace of the space $V^*$ of linear functionals on $V$.
+$W^0$ are the functionals that annihilate on $W$. Since 
+we are working on subspaces of $\R^n$, we can directly compute 
+the orthogonal complement in our implementation instead of the
+annihilator.
+
+
+\begin{prop}
+  If $V$ is a finite dimensional vector space defined with an inner product
+  $\langle \cdot , \cdot \rangle$ and $W$ is a subspace of $V$
+  then the image of the annhilator $W^0$ through the linear 
+  isomorphism $\varphi: V^* \to V$ induced by the inner product, 
+  is the orthogonal of $W$ with respect to the said inner product.
+\end{prop}
+
+\begin{proof}
+  Let $V$ be an inner product space over the field $\K$ with an inner product defined as
+  $\langle \cdot , \cdot \rangle : V \times V \to \K$. 
+  Every linear functional can be 
+  represented with a vector. Let $\xi : V \to \K$ be a functional, 
+  $\xi \in  W^0$. Because $\xi(w)=0 \quad \forall  w \in W$, 
+  if $v$ represents $\xi$ we have that $(v, w)=\xi(w)=0$ for all $w \in W$. 
+  We obtain that $\varphi(W^0) \subseteq W^{\perp}$.
+  If $v \in W^\perp$  
+  then the functional $x \mapsto (v, x)$ cancels over $W$ 
+  (by the definition of orthogonality).
+\end{proof}
+
+To compute the orthogonal complement of a vector subspace $W$, we
+compute $W^\perp = \mker{A^T}$, where $A$ is the matrix whose column space 
+is $W$. Proof is available in \cite{ila}.
+
+
+\captionof{figure}{Implementation of Backwards Partition Refinement}
+\lstinputlisting[language=go]{../automata/backwards.go}
+
+\begin{note}
+    \textbf{Applications of SVD} \\
+  
+    Let's consider the singular value decomposition of a matrix $A \in \R^{m \times n}$:
+  
+    \begin{equation*}
+      \begin{aligned}
+        A = U \Sigma V^T & \quad & \Sigma = \diag{\sigma_1, \sigma_2, \hdots, \sigma_r  } 
+         & \quad &  U \in \R^{m \times m} & \quad & V \in \R^{n \times n}
+      \end{aligned}
+    \end{equation*}
+  
+    Where $V$ and $U$ are orthogonal and the singular values are ordered: $\sigma_1 \geq \sigma_2 \geq \hdots \geq \sigma_r \geq 0$.
+    It follows that $\mrank{A}$ is equal to the number of nonzero singular values, and
+    as explained in \cite{svd}:
+    
+    \begin{enumerate}
+      \item  $\mrank{A} = \mrank{\Sigma} = r$
+      \item The column space of $A$ is spanned by the first $r$ columns of $U$.
+      \item The null space of $A$ is spanned by the last $n − r$ columns of $V$.
+      \item The row space of $A$ is spanned by the first $r$ columns of $V$.
+      \item The null space of $A^T$ is spanned by the last $m − r$ columns of $U$.
+    \end{enumerate}
+    
+    Of our interest, are only the computation of the null space and column space.
+    The implementation 
+    can be found in files \texttt{lin/colspace.go} and \texttt{lin/nullspace.go}.
+  \end{note}
+

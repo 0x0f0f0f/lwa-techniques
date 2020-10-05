@@ -1,12 +1,14 @@
 \section{Algorithms}
 The first algorithm we implement to compute language equivalence, called \texttt{HKC},
-is adapted from \cite{DBLP:journals/corr/Bonchi0K17}. It was first introduced by 
+is adapted from \cite{DBLP:journals/corr/Bonchi0K17}. 
+The algorithm returns \texttt{true} $\iff \sqmap{v_1} - \sqmap{v_2}$.
+It was first introduced by 
 Bonchi and Pous in \cite{bonchi2013checking}.
 The algorithm, extending the Hopcroft and Karp procedure 
 \cite{hopcroft1971linear} with \textit{congruence closure}, is 
 proven to be sound and complete \cite{DBLP:journals/corr/Bonchi0K17}.
-Originally, the algorithm was defined for 
-WAs over semirings, but we recall that in this work we are only 
+It is defined for 
+WAs over semirings, but in this implementation we are only 
 considering fields, in particular 
 the field of real numbers ($\K = \R$).
 The problem of checking language equivalence 
@@ -30,7 +32,7 @@ anche per i field e i numeri reali???? o sono lo equivalenti?).
 Adapted from \cite{BONCHI201277}, 
 \texttt{BPR} is a fixed-point iterative method that, given an LWA
 $L = (V, t, o)$,
-computes a basis of the subspace of $V$
+it computes a basis of the subspace of $V$
 representing the complementary relation of $\llwb$ (we later show it to be the 
 orthogonal complement in case $V$ is an inner product space). 
 Another version of the algorithm is defined in the same work,
@@ -49,11 +51,11 @@ The \texttt{BPR} algorithm starts from a relation $R_0$, that is the complement
 of the relation identifying vectors with equal weights.
 It then incrementally computes the space of all states that are reachable from 
 $R_0$ in a \textit{backwards} direction. Intuitively, "going backwards" means 
-working with the transpose transitions functions $t_a^t$.
+working with the transpose transitions functions $t_a^T$.
 
-In the next section we compare execution results of our implementation of the algorithms
-\texttt{BPR} and \texttt{HKC} to verify the correctness of the implementation,
-and to analyze when one of the two algorithms is the convenient choice.
+In the next sections we will compare execution of our implementation of the algorithms
+\texttt{BPR} and \texttt{HKC} to verify correctness,
+and to provide insight on runtime results.
 Lemma \ref{lem:coincide}, introduced above, is key to our work. By stating that 
 $\llwb$ coincides with $\sim_l$, we can confidently say that the two algorithms 
 compute an answer for same the decision problem:
@@ -64,12 +66,13 @@ compute an answer for same the decision problem:
 
 %TODO
 TODO costo computazionale HKC.
+
 \texttt{BPR} has a cost of $O(n^4)$ operations 
 to initially compute the largest linear weighted bisimulation,
-which can be eventually reduced to $O(n^3)$.
-In our implementation, by computing a basis of the orthogonal complement of $\llwb$,
-the cost of checking if two vectors are language equivalent is reduced to the
-cost of matrix multiplication ($O(n^2)$). \texttt{BPR} is efficient when we
+which can be eventually reduced to $O(n^3)$ \cite{BONCHI201277}.
+In our implementation, by initially computing a basis of the orthogonal complement of $\llwb$,
+the cost of checking if two vectors are language equivalent is then reduced to the
+cost of matrix multiplication ($O(n^2)$). \texttt{BPR} is a great choice when we
 have to decide if a large number of vectors in a WA are language equivalent.
 
 %=========================================================================
@@ -87,7 +90,7 @@ We give a pseudocode definition of the \texttt{HKC} procedure:
 We now recall the backwards algorithm for computing $\llwb$ defined in \cite{BONCHI201277}.
 The algorithm is defined by the iterative method:
 \begin{eqnarray}
-  R_0 = \mker{o}^0, & \quad & R_{i+1} = R_i + \sum_{a \in A} t_a^t(R_i) \label{back} 
+  R_0 = \mker{o}^0, & \quad & R_{i+1} = R_i + \sum_{a \in A} t_a^T(R_i) \label{back} 
 \end{eqnarray}
 Where $\mker{o}^0$ is an annihilator.
 The algorithm stops when $R_{j+1} = R_j$. An index $j \leq \dim(V)$ is 

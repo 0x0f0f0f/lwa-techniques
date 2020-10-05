@@ -20,12 +20,12 @@ func (a *Automaton) BackwardsPartitionRefinement() {
 	// lastIndex := 0
 
 	for i := 1; i <= a.Dim; i++ {
-		// Σ_{a \in A} T_a^t(R_i)
+		// \sum_{a \in A} T_a^T(R_i)
 		for _, sym := range a.A {
 			newBasis := a.ApplyTransposeTransitionBasis(sym, lastBasis)
 			currBasis = lin.Union(currBasis, newBasis)
-			currBasis = lin.OrthonormalColumnSpaceBasis(currBasis, a.Tol).(*mat.Dense)
 		}
+		currBasis = lin.OrthonormalColumnSpaceBasis(currBasis, a.Tol).(*mat.Dense)
 
 		lastBasis = currBasis
 	}
@@ -35,6 +35,8 @@ func (a *Automaton) BackwardsPartitionRefinement() {
 	// a.LLWB = lin.Complement(currBasis).(*mat.Dense)
 }
 
+// method that, after an LLWB is computed through BPR,
+// checks the equivalence of 2 vectors
 func (a Automaton) BPREquivalence(v1, v2 *mat.VecDense) bool {
 	if a.LLWBperp == nil {
 		log.Fatalln("largest linear weighted bisimulation not computed for automaton")

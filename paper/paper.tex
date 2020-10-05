@@ -5,7 +5,7 @@
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
-\usepackage{hyperref}       % hyperlinks
+\usepackage[hidelinks]{hyperref}       % hyperlinks
 \usepackage{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsfonts}       % blackboard math symbols
@@ -97,7 +97,7 @@
   breaklines, breakatwhitespace=true
 }
 
-\title{DRAFT: Go Implementation of Up-To Techniques for Equivalence of Weighted Languages}
+\title{DRAFT: Go Implementation of Up-To Techniques for Weighted Language Equivalence}
 
 %\thanks{Use footnote for providing further
 %information about author (webpage, alternative
@@ -138,8 +138,7 @@ of two vectors (states) for a given weighted automata by using an additional
 data structure representing a congruence relation.
 We then compare results of the two algorithms to verify their correctness
 and performance on randomly generated samples. 
-We finally provide comparison of runtime statistics and suggest 
-which of the two algorithm is the best choice for different usage cases.
+We finally provide a comparison and runtime statistics.
 \end{abstract}
 
 
@@ -156,94 +155,11 @@ which of the two algorithm is the best choice for different usage cases.
 
 \input{sections/algorithms.tex}
 
+\input{sections/implementation.tex}
 
+\input{sections/runtime.tex}
 
-
-\section{Implementation}
-\label{sec:impl}
-
-The algorithms and data structures for this paper are implemented in the Go programming 
-language. This implementation makes use of the Gonum library for numerical 
-computations. We only import the Gonum libraries for matrices and linear algebra 
-and visual plotting of samples and functions.
-Real numbers are implemented with double precision floating point numbers,  
-known as the \texttt{float64} type in the Go programming language.
-
-
-\begin{defn}
-  \textbf{Applications of SVD} \\
-
-  Let's consider the singular value decomposition of a matrix $A \in \R^{m \times n}$:
-
-  \begin{equation*}
-    \begin{aligned}
-      A = U \Sigma V^T & \quad & \Sigma = \diag{\sigma_1, \sigma_2, \hdots, \sigma_r  } 
-       & \quad &  U \in \R^{m \times m} & \quad & V \in \R^{n \times n}
-    \end{aligned}
-  \end{equation*}
-
-  Where $V$ and $U$ are orthogonal and the singular values are ordered: $\sigma_1 \geq \sigma_2 \geq \hdots \geq \sigma_r \geq 0$.
-  It follows that $\mrank{A}$ is equal to the number of nonzero singular values, and
-  as explained in \cite{svd}:
-  
-  \begin{enumerate}
-    \item  $\mrank{A} = \mrank{\Sigma} = r$
-    \item The column space of $A$ is spanned by the first $r$ columns of $U$.
-    \item The null space of $A$ is spanned by the last $n − r$ columns of $V$.
-    \item The row space of $A$ is spanned by the first $r$ columns of $V$.
-    \item The null space of $A^T$ is spanned by the last $m − r$ columns of $U$.
-  \end{enumerate}
-  
-  Of our interest, are only the computation of the null space and columns space.
-  The implementation, applying SVD, 
-  can be found in files \texttt{lin/colspace.go} and \texttt{lin/nullspace.go}.
-\end{defn}
-
-
-
-
-
-
-\subsection{Implementing the backwards partition refinement algorithm}
-
-To compute $\llwb$ at the last step of the algorithm,
-we need to compute $R_j^0$.
-If $V$ is a vector space and $W$ is a
-subspace of $W$, the annihilator of $W$, respectively $W^0$ is 
-a subspace of the space $V^*$ of linear functionals on $V$.
-$W^0$ are the functionals that annihilate on $W$. Since 
-we are working on subspaces of $\R^n$, we can directly compute 
-the orthogonal complement in our implementation instead of the
-annihilator.
-
-
-\begin{prop}
-  If $V$ is a finite dimensional vector space defined with an inner product
-  $\langle \cdot , \cdot \rangle$ and $W$ is a subspace of $V$
-  then the image of the annhilitaor $W^0$ through the linear 
-  isomorphism $\varphi: V^* \to V$ induced by the inner product, 
-  is the orthogonal of $W$ with respect to the said inner product.
-\end{prop}
-
-\begin{proof}
-  Let $V$ be an inner product space over the field $\K$ with an inner product defined as
-  $\langle \cdot , \cdot \rangle : V \times V \to \K$. 
-  Every linear functional can be 
-  represented with a vector. Let $\xi : V \to \K$ be a functional, 
-  $\xi \in  W^0$. Because $\xi(w)=0 \quad \forall  w \in W$, 
-  if $v$ represents $\xi$ we have that $(v, w)=\xi(w)=0$ for all $w \in W$. 
-  We obtain that $\varphi(W^0) \subseteq W^{\perp}$.
-  If $v \in W^\perp$  
-  then the functional $x \mapsto (v, x)$ cancels over $W$ 
-  (by the definition of orthogonality).
-\end{proof}
-
-
-To compute the orthogonal complement of a vector subspace $W$, we
-compute $W^\perp = \mker{A^T}$, where $A$ is the matrix with 
-column vectors in the spanning set of $W$ as its columns. Precisely, $W$ is 
-represented as the 
-column space of $A$. Proof is available in \cite{ila}.
+\input{sections/conclusion.tex}
 
 
 %=============================================================
@@ -279,35 +195,8 @@ column space of $A$. Proof is available in \cite{ila}.
 
 
 \bibliographystyle{unsrt}
-\bibliography{references}  %%% Remove comment to use the external .bib file (using bibtex).
-%%% and comment out the ``thebibliography'' section.
+\bibliography{references} 
 
-% 
-% %%% Comment out this section when you \bibliography{references} is enabled.
-% \begin{thebibliography}{1}
-% 
-% \bibitem{kour2014real}
-% George Kour and Raid Saabne.
-% \newblock Real-time segmentation of on-line handwritten arabic script.
-% \newblock In {\em Frontiers in Handwriting Recognition (ICFHR), 2014 14th
-%   International Conference on}, pages 417--422. IEEE, 2014.
-% 
-% \bibitem{kour2014fast}
-% George Kour and Raid Saabne.
-% \newblock Fast classification of handwritten on-line arabic characters.
-% \newblock In {\em Soft Computing and Pattern Recognition (SoCPaR), 2014 6th
-%   International Conference of}, pages 312--318. IEEE, 2014.
-% 
-% \bibitem{hadash2018estimate}
-% Guy Hadash, Einat Kermany, Boaz Carmeli, Ofer Lavi, George Kour, and Alon
-%   Jacovi.
-% \newblock Estimate and replace: A novel approach to integrating deep neural
-%   networks with existing applications.
-% \newblock {\em arXiv preprint arXiv:1804.09028}, 2018.
-% 
-% \end{thebibliography}
-% 
-% 
 \appendix
 
 %\input{sections/appendix.tex}

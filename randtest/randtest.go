@@ -74,12 +74,32 @@ func RandTest(o TestOptions) TestResults {
 	}
 
 	for i := range samples {
+		// test for vectors in span of LLWB
 		j := rand.Intn(o.NumSamples)
 		for j == i {
 			j = rand.Intn(o.NumSamples)
 		}
 		resBPR := az.BPREquivalence(samples[i], samples[j])
-		resHKC, _ := az.HKC(samples[i], samples[j], 30)
+		resHKC, _ := az.HKC(samples[i], samples[j])
+
+		if resBPR {
+			results.Bprt++
+		}
+
+		if resHKC {
+			results.Hkct++
+		}
+
+		if resBPR == resHKC {
+			results.Verified++
+		}
+
+		// test for totally random vectors
+		w1 := lin.RandVec(az.Dim, 100)
+		w2 := lin.RandVec(az.Dim, 100)
+
+		resBPR = az.BPREquivalence(w1, w2)
+		resHKC, _ = az.HKC(w1, w2)
 
 		if resBPR {
 			results.Bprt++

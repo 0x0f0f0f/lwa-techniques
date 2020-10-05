@@ -52,14 +52,14 @@ func main() {
 	notnull := float64(numTests) - totnull
 
 	fmt.Println()
-	fmt.Println(numSamples, "samples per test")
-	fmt.Println(numTests, "tests")
-	fmt.Println("LLWP is not empty in", notnull, "tests")
-	fmt.Println("language equivalence HKC = BPR for", totalVerified, "samples")
-	percent := (totalVerified * 100) / (notnull * float64(numSamples))
+	fmt.Println(numSamples, "samples per automaton")
+	fmt.Println(numTests, "automata")
+	fmt.Println("LLWP is not empty for", notnull, "automata")
+	fmt.Printf("language equivalence HKC = BPR for %d samples\n", int(totalVerified))
+	percent := (totalVerified * 100) / (notnull * 2 * float64(numSamples))
 
-	fmt.Println("BPR equivalence verified for ", totbpr, "samples")
-	fmt.Println("HKC equivalence verified for ", tothkc, "samples")
-	fmt.Printf("total success rate is %.20g%%\n", percent)
+	fmt.Printf("BPR equivalence verified for %d samples\n", int(totbpr))
+	fmt.Printf("HKC equivalence verified for %d samples\n", int(tothkc))
+	fmt.Printf("confidence is %.20g%%\n", percent)
 
 }

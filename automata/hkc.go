@@ -1,3 +1,5 @@
+// this file contains the implementation of the HKC procedure
+
 package automata
 
 import (
@@ -5,7 +7,7 @@ import (
 )
 
 // checks the language equivalence of two state vectors for a given weighted automaton
-func (a Automaton) HKC(v1, v2 *mat.VecDense, maxiter int) (bool, error) {
+func (a Automaton) HKC(v1, v2 *mat.VecDense) (bool, error) {
 	rel := NewRelation(0, a.Dim)
 	todo := NewPairStack()
 
@@ -17,7 +19,6 @@ func (a Automaton) HKC(v1, v2 *mat.VecDense, maxiter int) (bool, error) {
 	// insert (v1, v2) into the todo list
 	todo = PairStackPush(todo, p)
 
-	i := 0
 	for !todo.IsEmpty() {
 		// extract (v1', v2') from todo
 		q, err := PairStackPop(todo)
@@ -49,9 +50,6 @@ func (a Automaton) HKC(v1, v2 *mat.VecDense, maxiter int) (bool, error) {
 
 		// insert (v1', v2') into R
 		rel.Add(q)
-
-		// fmt.Println("R = ", rel)
-		i++
 	}
 
 	return true, nil

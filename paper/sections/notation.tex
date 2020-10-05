@@ -55,16 +55,26 @@ the language  of the automaton can be defined as $\sqmap{i}$.
   transitive. 
 \end{defn}
 
-\begin{defn}
-  The congruence closure $c(R)$ of a relation R is the smallest congruence relation 
-  $R'$ such that $R \subseteq R'$ 
-\end{defn}
 
 An equivalence relation which is compatible with all the operations of
 the algebraic structure on which it is defined on, is called a 
 \textit{congruence relation}. Compatibility with the algebraic structure operations
 means that algebraic operations applied on equivalent elements will still
 yield equivalent elements. 
+
+\begin{defn}
+  The congruence closure $c(R)$ of a relation R is the smallest congruence relation 
+  $R'$ such that $R \subseteq R'$ 
+\end{defn}
+
+\begin{defn}
+  \label{def:congclos}
+  \textit{Generating set for the congruence closure:} \\
+  Let $\K$ be a field, $X$ a finite set and $R \subseteq \K^X \times \K^X$
+  a relation. Let $(v, v') \in \K^X \times \K^X$ be a pair of vectors.
+  The generating set is defined as  $U_R = \left\lbrace u - u' \mid (u, u') \in R \right\rbrace$.
+  Then $(v, v') \in c(R) \iff (v - v') \in U_R$
+\end{defn}
 
 
 
