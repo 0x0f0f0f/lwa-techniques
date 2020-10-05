@@ -5,9 +5,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/0x0f0f0f/lwa-techniques/automata"
-	"github.com/0x0f0f0f/lwa-techniques/lin"
-	"gonum.org/v1/gonum/mat"
+	"github.com/0x0f0f0f/lwa-techniques/randtest"
 )
 
 func check(err error) {
@@ -16,66 +14,21 @@ func check(err error) {
 	}
 }
 
-const tol = 10e-12
-
-func randTest(dim, numSyms, numSamples, maxweight int) (verified, bprt, hkct, null float64) {
-	az := automata.RandAutomaton(numSyms, dim, maxweight, tol)
-
-	az.BackwardsPartitionRefinement()
-
-	//fmt.Println(az)
-	lin.CleanTolDense(az.LLWBperp, tol)
-
-	samples := make([]*mat.VecDense, numSamples)
-	llwb := lin.Complement(az.LLWBperp, tol).(*mat.Dense)
-	_, dimLLWB := llwb.Dims()
-
-	lin.CleanTolDense(llwb, tol)
-
-	if mat.Equal(llwb, mat.NewDense(dim, 1, nil)) {
-		return 0, 0, 0, 1
-	}
-
-	//lin.PrintMat(llwb)
-
-	for i := range samples {
-		samples[i] = lin.LinearCombination(llwb, lin.RandVec(dimLLWB))
-	}
-
-	for i := range samples {
-		j := rand.Intn(numSamples)
-		for j == i {
-			j = rand.Intn(numSamples)
-		}
-		resBPR := az.BPREquivalence(samples[i], samples[j])
-		resHKC, _ := az.HKC(samples[i], samples[j], 30)
-
-		if resBPR {
-			bprt++
-		}
-
-		if resHKC {
-			hkct++
-		}
-
-		if resBPR == resHKC {
-			verified++
-			//fmt.Println(resBPR, resHKC)
-			//lin.PrintMat(samples[i])
-			//lin.PrintMat(samples[j])
-		}
-	}
-
-	return
-}
-
 func main() {
-	//defer profile.Start(profile.MemProfile).Stop()
+	// defer profile.Start(profile.MemProfile).Stop()
+
+	opts := randtest.TestOptions{
+		Dim:        4,
+		NumSymbols: 2,
+		NumSamples: 1000,
+		MaxWeight:  3,
+		Mode:       "nat",
+	}
 
 	rand.Seed(time.Now().UnixNano())
 
 	numSamples := 1000
-	numTests := 100
+	numTests := 100000
 	totalVerified := 0.0
 
 	totbpr := 0.0
@@ -83,14 +36,18 @@ func main() {
 	totnull := 0.0
 
 	for i := 0; i < numTests; i++ {
+		fmt.Printf("running test %20d...\r", i+1)
 
-		currVerified, bprverified, hkcverified, null := randTest(4, 1, numSamples, 2)
-		// percentile := (100.0 * currVerified) / float64(numSamples)
-		totalVerified += currVerified
-		totbpr += bprverified
-		tothkc += hkcverified
-		totnull += null
+		results := randtest.RandTest(opts)
+		totalVerified += results.Verified
+		totbpr += results.Bprt
+		tothkc += results.Hkct
+		if results.Null {
+			totnull++
+		}
 	}
+
+	fmt.Printf("tests completed\n")
 
 	notnull := float64(numTests) - totnull
 

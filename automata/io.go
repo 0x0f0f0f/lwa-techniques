@@ -3,6 +3,7 @@ package automata
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -12,6 +13,8 @@ import (
 
 	"gonum.org/v1/gonum/mat"
 )
+
+func errRead(msg string) error { return errors.New("could not read automaton:" + msg) }
 
 // Helper function to sort and deduplicate in-place a slice of strings
 func dedupStr(in []string) []string {

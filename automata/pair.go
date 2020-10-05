@@ -2,44 +2,64 @@ package automata
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/0x0f0f0f/lwa-techniques/lin"
 	"gonum.org/v1/gonum/mat"
 )
 
-// represents an unordered pair of vectors
-type Pair struct {
-	Left  *mat.VecDense
-	Right *mat.VecDense
-	Dim   int
-}
-
 // creates a new pair of vectors
-func NewPair(l, r *mat.VecDense) (*Pair, error) {
+func NewPair(l, r *mat.VecDense) (*mat.Dense, error) {
 	ld, _ := l.Dims()
 	rd, _ := r.Dims()
 	if ld != rd {
 		return nil, errors.New("dimensions of vector do not match")
 	}
-	return &Pair{Left: l, Right: r, Dim: ld}, nil
+	m := mat.NewDense(ld, 2, nil)
+
+	for i := 0; i < ld; i++ {
+		m.Set(i, 0, l.AtVec(i))
+		m.Set(i, 1, r.AtVec(i))
+	}
+	return m, nil
+}
+
+// return left element of a vector pair
+func PairLeft(p *mat.Dense) *mat.VecDense {
+	return p.ColView(0).(*mat.VecDense)
+}
+
+// return right element of a vector pair
+func PairRight(p *mat.Dense) *mat.VecDense {
+	return p.ColView(1).(*mat.VecDense)
+}
+
+// return subtraction of elements of a vector pair
+func PairSub(p *mat.Dense) *mat.VecDense {
+	m, _ := p.Dims()
+	sub := mat.NewVecDense(m, nil)
+	sub.SubVec(PairLeft(p), PairRight(p))
+	return sub
+}
+
+// return true if a matrix is a vector pair
+func PairCheck(p *mat.Dense) bool {
+	_, n := p.Dims()
+	return n == 2
 }
 
 // Returns true if two pairs equal each other
-func (p Pair) Eqs(p1 *Pair, tol float64) bool {
+func PairEqs(p, p1 *mat.Dense, tol float64) bool {
+	m, _ := p.Dims()
+	m1, _ := p1.Dims()
 	// if the dimensions do not match, pairs are not equal
-	if p.Dim != p1.Dim {
+	if m != m1 || !PairCheck(p) || !PairCheck(p1) {
 		return false
 	}
-	eql := lin.EqVecTol(p.Left, p1.Left, tol) && lin.EqVecTol(p.Right, p1.Right, tol)
-	eqr := lin.EqVecTol(p.Left, p1.Right, tol) && lin.EqVecTol(p.Right, p1.Left, tol)
+	eq := true
+	for i := 0; i < 2; i++ {
+		eq = eq && lin.EqVecTol(p.ColView(i), p1.ColView(i), tol)
+		eq = eq && lin.EqVecTol(p.ColView(i), p1.ColView(2-i), tol)
+	}
 
-	return eql || eqr
-}
-
-func (p Pair) String() string {
-	fl := mat.Formatted(p.Left, mat.FormatMATLAB())
-	fr := mat.Formatted(p.Right, mat.FormatMATLAB())
-
-	return fmt.Sprintf("(%.20g, %.20g)", fl, fr)
+	return eq
 }

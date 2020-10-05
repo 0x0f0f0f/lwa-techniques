@@ -1,0 +1,96 @@
+\section{Algorithms}
+The first algorithm we implement to compute language equivalence, called \texttt{HKC},
+is adapted from \cite{DBLP:journals/corr/Bonchi0K17}. It was first introduced by 
+Bonchi and Pous in \cite{bonchi2013checking}.
+The algorithm, extending the Hopcroft and Karp procedure 
+\cite{hopcroft1971linear} with \textit{congruence closure}, is 
+proven to be sound and complete \cite{DBLP:journals/corr/Bonchi0K17}.
+Originally, the algorithm was defined for 
+WAs over semirings, but we recall that in this work we are only 
+considering fields, in particular 
+the field of real numbers ($\K = \R$).
+The problem of checking language equivalence 
+has been proven undecidable for an arbitrary semiring, so termination 
+may not always be guaranteed. However, it has been shown to be decidable
+for a broad range of semirings, for example, all the complete and
+distributive lattices.
+\texttt{HKC} computes $v_1 \sim_l v_2$ for a given weighted automaton
+$W = (X, t, o)$ and two vectors $v_1, v_2 \in \K^X$. 
+by computing a congruence closure,
+and it does so without linearizing the state space. 
+
+We compare \texttt{HKC} with an algorithm called 
+\textit{Backwards Partition Refinement}, that we will call BPR for short. 
+
+% TODO
+(TODO chiedi a filippo: nelle conclusioni di \cite{BONCHI201277} dice che è diverso 
+dall'algoritmo visto nel paper di boreale \cite{boreale2009weighted}. è il caso 
+anche per i field e i numeri reali???? o sono lo equivalenti?).
+
+Adapted from \cite{BONCHI201277}, 
+\texttt{BPR} is a fixed-point iterative method that, given an LWA
+$L = (V, t, o)$,
+computes a basis of the subspace of $V$
+representing the complementary relation of $\llwb$ (we later show it to be the 
+orthogonal complement in case $V$ is an inner product space). 
+Another version of the algorithm is defined in the same work,
+called \textit{Forward Partition Refinement}, which directly computes
+a basis for $\llwb$
+but is shown to be way less efficient than the backwards version.
+
+
+\begin{note}
+    Recall from section \ref{sec:notation} that $\llwb$ is a linear relation, 
+    therefore $v_1 \llwb v_2 \iff (v_1 - v_2) \in \mker{\llwb}$
+\end{note}
+
+
+The \texttt{BPR} algorithm starts from a relation $R_0$, that is the complement 
+of the relation identifying vectors with equal weights.
+It then incrementally computes the space of all states that are reachable from 
+$R_0$ in a \textit{backwards} direction. Intuitively, "going backwards" means 
+working with the transpose transitions functions $t_a^t$.
+
+In the next section we compare execution results of our implementation of the algorithms
+\texttt{BPR} and \texttt{HKC} to verify the correctness of the implementation,
+and to analyze when one of the two algorithms is the convenient choice.
+Lemma \ref{lem:coincide}, introduced above, is key to our work. By stating that 
+$\llwb$ coincides with $\sim_l$, we can confidently say that the two algorithms 
+compute an answer for same the decision problem:
+
+\begin{center}
+    Are two vectors $v_1$ and $v_2$ language-equivalent for a given weighted automata? 
+\end{center}
+
+%TODO
+TODO costo computazionale HKC.
+\texttt{BPR} has a cost of $O(n^4)$ operations 
+to initially compute the largest linear weighted bisimulation,
+which can be eventually reduced to $O(n^3)$.
+In our implementation, by computing a basis of the orthogonal complement of $\llwb$,
+the cost of checking if two vectors are language equivalent is reduced to the
+cost of matrix multiplication ($O(n^2)$). \texttt{BPR} is efficient when we
+have to decide if a large number of vectors in a WA are language equivalent.
+
+%=========================================================================
+
+\subsection{HKC Algorithm}
+We give a pseudocode definition of the \texttt{HKC} procedure:
+
+\captionof{figure}{The \texttt{HKC}($v_1, v_2$) procedure}
+\lstinputlisting[escapeinside={(*}{*)}]{hkc.txt}
+\label{fig:hkc}
+
+\subsection{Backwards Partition Refinement Algorithm for the Largest Weighted Bisimulation}
+\label{sec:algo2}
+
+We now recall the backwards algorithm for computing $\llwb$ defined in \cite{BONCHI201277}.
+The algorithm is defined by the iterative method:
+\begin{eqnarray}
+  R_0 = \mker{o}^0, & \quad & R_{i+1} = R_i + \sum_{a \in A} t_a^t(R_i) \label{back} 
+\end{eqnarray}
+Where $\mker{o}^0$ is an annihilator.
+The algorithm stops when $R_{j+1} = R_j$. An index $j \leq \dim(V)$ is 
+guaranteed to exist, such that the algorithms terminates at step $j$.
+It follows that $\llwb = R_j^0$.
+Proof is available in section 4.2 of \cite{BONCHI201277}

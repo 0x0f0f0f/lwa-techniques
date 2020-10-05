@@ -1,0 +1,10 @@
+HKC((*$v_1, v_2$*)):
+(*$R$*) := (*$\emptyset$*); todo := (*$\emptyset$*)
+while todo is not empty do 
+    extract ((*$v'_1, v'_2$*)) from todo 
+    if ((*$v'_1, v'_2$*)) (*$\in c(R)$*) then continue 
+    if (*$ o(v'_1) \neq o(v'_2) $*) then return false
+    for all (* $a \in A$ *)
+        insert ((*$ t_a(v'_1), t_a(v'_2) $*)) into todo
+    insert ((*$v'_1, v'_2$*)) into (*$R$*)
+return true

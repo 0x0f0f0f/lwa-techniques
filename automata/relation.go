@@ -1,8 +1,7 @@
 package automata
 
 import (
-	"bytes"
-	"fmt"
+	"errors"
 
 	"github.com/0x0f0f0f/lwa-techniques/lin"
 	"gonum.org/v1/gonum/mat"
@@ -12,20 +11,41 @@ import (
 // the relation is a congruence if it is an equivalence
 // and is closed under linear combinations.
 type Relation struct {
-	s   []*Pair         // the set of pairs in the relations
-	u   []*mat.VecDense // generating set for the congruence closure
-	tol float64
+	s    *mat.Dense // the set of pairs in the relations
+	u    *mat.Dense // generating set for the congruence closure
+	size int        // how many pairs
+	dim  int        // number of rows
+	tol  float64
 }
 
 // creates a new empty relation
-func NewRelation(tol float64) Relation {
-	return Relation{tol: tol}
+func NewRelation(tol float64, dim int) Relation {
+	s := mat.NewDense(dim, 1, nil)
+	u := mat.NewDense(dim, 1, nil)
+	s.Reset()
+	u.Reset()
+	return Relation{tol: tol, dim: dim, s: s, u: u}
+}
+
+func (r Relation) GetPair(i int) (*mat.Dense, error) {
+	if i < 0 || i >= r.size {
+		return nil, errors.New("index out of bounds")
+	}
+	return r.s.Slice(0, r.dim, i*2, (i*2)+2).(*mat.Dense), nil
 }
 
 // returns true if the relation contains the pair of vectors. O(n)
-func (r Relation) Has(p *Pair) bool {
-	for _, v := range r.s {
-		if v.Eqs(p, r.tol) {
+func (r Relation) Has(p *mat.Dense) bool {
+	m, _ := r.s.Dims()
+	if m != r.dim && !PairCheck(p) {
+		panic(errors.New("dimension mismatch"))
+	}
+	for i := 0; i < r.size; i++ {
+		p1, err := r.GetPair(i)
+		if err != nil {
+			panic(err)
+		}
+		if PairEqs(p1, p, r.tol) {
 			return true
 		}
 	}
@@ -33,37 +53,54 @@ func (r Relation) Has(p *Pair) bool {
 }
 
 // adds a pair of vectors to the relation
-func (r *Relation) Add(p *Pair) {
+func (r *Relation) Add(p *mat.Dense) {
 	// if the set already contains the pair (v, v'), return
 	if r.Has(p) {
 		return
 	}
+	r.dim++
 	// add the pair (v,v') to the set
-	r.s = append(r.s, p)
-	// sub = v - v'
-	sub := mat.VecDenseCopyOf(p.Left)
-	sub.SubVec(p.Left, p.Right)
+	if r.s.IsEmpty() {
+		r.s = mat.DenseCopyOf(p)
+	} else {
+		r.s.Augment(r.s, p)
+	}
 
-	// add the subtraction result to the closure generating set
+	// add (v - v') result to the closure generating set
+	sub := PairSub(p)
 	subInU := false
-	for _, v := range r.u {
+
+	if r.u.IsEmpty() {
+		r.u = mat.DenseCopyOf(sub)
+		return
+	}
+
+	_, un := r.u.Dims()
+	for j := 0; j < un; j++ {
+		v := r.u.ColView(j).(*mat.VecDense)
 		if lin.EqVecTol(v, sub, r.tol) {
 			subInU = true
 		}
 	}
+
 	if !subInU {
-		r.u = append(r.u, sub)
+		r.u.Augment(r.u, sub)
 	}
 }
 
 // check if a pair of vectors is in a relation's congruence closure.
-func (r Relation) PairIsInCongruenceClosure(p *Pair) bool {
+func (r Relation) PairIsInCongruenceClosure(p *mat.Dense) bool {
 	// sub = v - v'
-	sub := mat.VecDenseCopyOf(p.Left)
-	sub.SubVec(p.Left, p.Right)
+	sub := PairSub(p)
 
 	// (v, v') ∈ c(R) iff v - v' ∈ U_R
-	for _, v := range r.u {
+	if r.u.IsEmpty() {
+		return false
+	}
+
+	_, un := r.u.Dims()
+	for j := 0; j < un; j++ {
+		v := r.u.ColView(j).(*mat.VecDense)
 		if lin.EqVecTol(v, sub, r.tol) {
 			return true
 		}
@@ -73,9 +110,5 @@ func (r Relation) PairIsInCongruenceClosure(p *Pair) bool {
 }
 
 func (r Relation) String() string {
-	b := bytes.Buffer{}
-	for _, uel := range r.u {
-		b.WriteString(fmt.Sprintf("%.5g,", mat.Formatted(uel, mat.FormatMATLAB())))
-	}
-	return fmt.Sprintf("(s = %v, u = [%s])", r.s, b.String())
+	return lin.StringMat(r.s) + lin.StringMat(r.u)
 }

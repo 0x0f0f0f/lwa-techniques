@@ -71,6 +71,5 @@ func Complement(spanset mat.Matrix, tol float64) mat.Matrix {
 	}
 
 	basis, _ := Nullspace(spanset.T(), tol)
-
 	return basis
 }

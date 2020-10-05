@@ -1,3 +1,6 @@
+// this file contains miscellaneous utility functions for various
+// linear algebra applications using Gonum
+
 package lin
 
 import (
@@ -32,7 +35,7 @@ func IsZeroTol(vec *mat.VecDense, tol float64) bool {
 }
 
 // returns true if two vectors are equal with a tolerance of tol
-func EqVecTol(a, b *mat.VecDense, tol float64) bool {
+func EqVecTol(a, b mat.Vector, tol float64) bool {
 	sub := mat.VecDenseCopyOf(a)
 	sub.SubVec(a, b)
 
@@ -48,11 +51,20 @@ func EyeDense(n int) *mat.Dense {
 	return a
 }
 
+// generate a random float64 between -w and w
+func randFloat64(w float64) float64 {
+	sign := 1.0
+	if rand.Intn(2) == 0 {
+		sign = -1.0
+	}
+	return sign * rand.Float64() * w
+}
+
 // generate a normally distributed random n*n matrix
-func RandDense(n int) *mat.Dense {
+func RandDense(n int, maxweight float64) *mat.Dense {
 	data := make([]float64, n*n)
 	for i := range data {
-		data[i] = rand.NormFloat64()
+		data[i] = randFloat64(maxweight)
 	}
 	return mat.NewDense(n, n, data)
 }
@@ -97,10 +109,19 @@ func LinearCombination(a *mat.Dense, b *mat.VecDense) *mat.VecDense {
 }
 
 // generate a normally distributed random n*1 vector
-func RandVec(n int) *mat.VecDense {
+func RandVec(n int, maxweight float64) *mat.VecDense {
 	data := make([]float64, n)
 	for i := range data {
-		data[i] = rand.NormFloat64()
+		data[i] = randFloat64(maxweight)
+	}
+	return mat.NewVecDense(n, data)
+}
+
+// generate a normally distributed random n*1 vector on natural numebrs
+func RandNatVec(n, max int) *mat.VecDense {
+	data := make([]float64, n)
+	for i := range data {
+		data[i] = float64(rand.Intn(max))
 	}
 	return mat.NewVecDense(n, data)
 }
@@ -120,11 +141,12 @@ func StringMat(a mat.Matrix) string {
 	return fmt.Sprintf("%.5g", mat.Formatted(a, mat.Squeeze()))
 }
 
+// print a matrix to stdout
 func PrintMat(a mat.Matrix) {
 	fmt.Println(StringMat(a))
 }
 
-// set elements of a which are < tol to 0
+// set elements of a to 0 if they are < tol (in abs)
 func CleanTolDense(a *mat.Dense, tol float64) {
 	m, n := a.Dims()
 	for i := 0; i < m; i++ {

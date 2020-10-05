@@ -1,14 +1,12 @@
 package automata
 
 import (
-	"errors"
-
 	"gonum.org/v1/gonum/mat"
 )
 
 // checks the language equivalence of two state vectors for a given weighted automaton
 func (a Automaton) HKC(v1, v2 *mat.VecDense, maxiter int) (bool, error) {
-	rel := NewRelation(0)
+	rel := NewRelation(0, a.Dim)
 	todo := NewPairStack()
 
 	p, err := NewPair(v1, v2)
@@ -16,52 +14,37 @@ func (a Automaton) HKC(v1, v2 *mat.VecDense, maxiter int) (bool, error) {
 		return false, err
 	}
 
-	// fmt.Println("p = ", p)
-
 	// insert (v1, v2) into the todo list
-	todo.Push(*p)
+	todo = PairStackPush(todo, p)
 
 	i := 0
-	for !todo.Empty() {
-		if i >= maxiter {
-			return false, errors.New("maximum iteration exceeded")
-		}
-		// fmt.Println("Step", i)
-
-		// fmt.Println("todo =", todo)
-
+	for !todo.IsEmpty() {
 		// extract (v1', v2') from todo
-		q, err := todo.Pop()
+		q, err := PairStackPop(todo)
 		if err != nil {
 			return false, err
 		}
-		//fmt.Println("Extracted pair is", q)
-		//fmt.Println("todo =", todo)
 
 		if rel.PairIsInCongruenceClosure(q) {
-			// fmt.Println("(v1', v2') \\in c(R)")
 			continue
 		}
 
-		o1 := a.GetOutput(q.Left)
-		o2 := a.GetOutput(q.Right)
-		// fmt.Println("o(v1) =", o1)
-		// fmt.Println("o(v2) =", o2)
+		o1 := a.GetOutput(PairLeft(q))
+		o2 := a.GetOutput(PairRight(q))
 		if o1 != o2 {
-			// fmt.Println("o(v1) =/= o(v2)")
 			return false, nil
 		}
 
 		for _, sym := range a.A {
 
-			w1 := a.ApplyTransition(sym, q.Left)
-			w2 := a.ApplyTransition(sym, q.Right)
+			w1 := a.ApplyTransition(sym, PairLeft(q))
+			w2 := a.ApplyTransition(sym, PairRight(q))
 			wp, err := NewPair(w1, w2)
 			if err != nil {
 				return false, err
 			}
 
-			todo.Push(*wp)
+			PairStackPush(todo, wp)
 		}
 
 		// insert (v1', v2') into R

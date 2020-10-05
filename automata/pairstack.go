@@ -1,47 +1,54 @@
+// stack data structure for real valued vector pairs, used in the HKC algorithm
+
 package automata
 
 import (
 	"errors"
-	"fmt"
+
+	"gonum.org/v1/gonum/mat"
 )
 
-// stack data structure for real valued vector pairs, used in the HKC algorithm
-type PairStack struct {
-	stack []Pair
-}
-
-// create a new empty pair stack
-func NewPairStack() PairStack {
-	return PairStack{stack: []Pair{}}
-}
-
-// returns true if the stack is empty, false otherwise
-func (ps PairStack) Empty() bool {
-	return len(ps.stack) == 0
+func NewPairStack() *mat.Dense {
+	m := mat.NewDense(1, 1, nil)
+	m.Reset()
+	return m
 }
 
 // returns the size
-func (ps PairStack) Size() int {
-	return len(ps.stack)
+func PairStackSize(s *mat.Dense) int {
+	if s.IsEmpty() {
+		return 0
+	}
+	_, n := s.Dims()
+	return n
 }
 
 // push a pair into the stack
-func (ps *PairStack) Push(p Pair) {
-	ps.stack = append(ps.stack, p)
-}
-
-func (ps PairStack) String() string {
-	return fmt.Sprintf("%v", ps.stack)
+func PairStackPush(s *mat.Dense, p *mat.Dense) *mat.Dense {
+	if s.IsEmpty() {
+		return mat.DenseCopyOf(p)
+	}
+	s.Augment(s, p)
+	return s
 }
 
 // pop a pair from the stack
-func (ps *PairStack) Pop() (*Pair, error) {
-	siz := ps.Size()
-	if siz == 0 {
+func PairStackPop(s *mat.Dense) (*mat.Dense, error) {
+	if s.IsEmpty() {
 		return nil, errors.New("stack is empty")
 	}
-	el := ps.stack[siz-1]
-	ps.stack = ps.stack[:siz-1]
+	m, n := s.Dims()
+	if n%2 != 0 {
+		return nil, errors.New("inconsisten stack: odd number of elements")
+	}
 
-	return &el, nil
+	pair := s.Slice(0, m, n-2, n).(*mat.Dense)
+
+	if n-2 > 0 {
+		s = s.Slice(0, m, 0, n-2).(*mat.Dense)
+	} else {
+		s.Reset()
+	}
+
+	return pair, nil
 }

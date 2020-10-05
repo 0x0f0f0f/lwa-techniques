@@ -16,5 +16,6 @@
 
 paper/*.aux
 paper/*.synctex.gz
+paper/*.bbl
 
 main

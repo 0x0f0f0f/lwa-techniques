@@ -14,15 +14,17 @@
 \usepackage{lipsum}
 \usepackage{amsthm}
 \usepackage{amsmath}
+\usepackage{eucal}
 \usepackage{mathtools}
 \usepackage[table]{xcolor}
 \usepackage{stmaryrd}
 \usepackage{amsfonts}
 \usepackage{lstlistings-golang}
+\usepackage{caption}
 
 % Code with syntax highlighting
 \usepackage{fancyvrb}
-\usepackage{listings}
+\usepackage{listingsutf8}
 \usepackage{textcomp}
 \usepackage{placeins}
 
@@ -83,12 +85,19 @@
 \definecolor{vblue}{RGB}{49,49,255}
 \definecolor{vorange}{RGB}{255,143,102}
 \lstset{
+  numbers=left,
+  frame=tb,
+  commentstyle=\color{mygreen},
 	basicstyle=\ttfamily,
 	columns=fullflexible,
-	keepspaces=true,
+  keepspaces=false,
+  showstringspaces=false,
+  extendedchars=true,
+  mathescape=true,
+  breaklines, breakatwhitespace=true
 }
 
-\title{Go Implementation of Up-To Techniques for Equivalence of Weighted Languages}
+\title{DRAFT: Go Implementation of Up-To Techniques for Equivalence of Weighted Languages}
 
 %\thanks{Use footnote for providing further
 %information about author (webpage, alternative
@@ -110,6 +119,10 @@
   %% \texttt{stariate@ee.mount-sheikh.edu} \\
 }
 
+\definecolor{mygreen}{rgb}{0,0.6,0}
+
+
+
 \begin{document}
 \maketitle
 
@@ -118,15 +131,15 @@ Weighted automata generalize non-deterministic automata by adding
 a quantity expressing the weight (or probability) of the execution of each transition.
 In this work we propose an implementation of two algorithms for computing language 
 equivalence in finite state weighted automata (WAs). The first, a
-linear partition refinement algorithm, calculates the largest linear weighted bisimulation
+linear partition refinement algorithm, computes the largest linear weighted bisimulation
 for any given LWA (Linear Weighted Automaton) through an iterative method, 
 the second algorithm checks the language equivalence 
 of two vectors (states) for a given weighted automata by using an additional
-data structure representing a congruence relation between states.
+data structure representing a congruence relation.
 We then compare results of the two algorithms to verify their correctness
 and performance on randomly generated samples. 
 We finally provide comparison of runtime statistics and suggest 
-which of the two algorithm is a the best choice for some usage cases.
+which of the two algorithm is the best choice for different usage cases.
 \end{abstract}
 
 
@@ -134,180 +147,17 @@ which of the two algorithm is a the best choice for some usage cases.
 \keywords{First keyword \and Second keyword \and More}
 
 
-\section{Introduction}
-\label{sec:intro}
+\input{sections/introduction.tex}
 
-In \cite{DBLP:journals/corr/Bonchi0K17}, up-to techniques are defined for
-weighted systems over arbitrary semirings, while in \cite{BONCHI201277}, up-to techniques
-are defined for Linear Weighted Automata (LWAs), under a more abstract coalgebraic perspective.
-
-\section{Preliminaries and Notation}
-\label{sec:notation}
-
-\begin{note}
-  Given two vector spaces $V_1, V_2$ we write $V_1 + V_2$ to denote $\mspan{V_1 \cup V_2}$
-\end{note}
-
-
-\begin{defn}
-  A \textit{weighted automaton} over a field $\K$ and an alphabet $A$ is a triple 
-  $(X,o,t)$ such that $X$ is a finite set of states, 
-  $t = \left\lbrace t_a : X \to \K\right\rbrace_{a \in A}$
-  is a set of transition functions indexed over the symbols of the alphabet $A$ and $o : X 
-  \to \K$ is the output function. 
-  $A^*$ is the set of all words over $A$. $\epsilon$ is the empty word and $aw$ is the
-  concatenation of a symbol $a$ to the word $w \in A^*$.
-  A weighted language is a function $\psi: A^* \to \K$.
-  A function mapping each state vector into its 
-  accepted language, $\sqmap{\cdot}: \K^X \to \K^{A^*}$ is defined as follows for every weighted automaton:
-
-  \begin{equation*}
-    \begin{aligned}
-      \forall v \in \K^X, a \in A, w \in A^* \quad \quad
-      \sqmap{v}(\epsilon) = o(v) \quad \quad
-      \sqmap{v}(aw) = \sqmap{t_a(v)}(w)  
-    \end{aligned}
-  \end{equation*}
-\end{defn}
-
-Two vectors $v_1, v_2 \in \K^{X\times 1}$ are weighted called language equivalent, denoted with 
-$v_1 \sim_l v_2 $ if and only if $ \sqmap
-{v_1} = \sqmap{v_2}$. One can extend the notion of language equivalence to states rather
-than for vectors by assigning to each state $x \in X$ the corresponding unit vector 
-$e_x \in \K^X$. When given an initial state $i$ for a weighted automaton, the language 
-of the automaton can be defined as $\sqmap{i}$.
-
-
-\begin{defn}
-  A binary relation $R \subseteq X \times Y$ between two sets $X, Y$ is a subset of the 
-  cartesian product of the sets. A relation is called \textit{homogeneous} or an \textit
-  {endorelation} if it is a binary relation over $X$ and itself: $R \subseteq X \times
-   X$. 
-  In such case, it is simply called a binary relation over $X$.
-  An \textit{equivalence relation} is a binary relation that is reflexive, symmetric and
-  transitive. 
-\end{defn}
-
-\begin{defn}
-  The congruence closure $c(R)$ of a relation R is the smallest congruence relation 
-  $R'$ such that $R \subseteq R'$ 
-\end{defn}
-
-An equivalence relation which is compatible with all the operations of
-the algebraic structure on which it is defined on, is called a 
-\textit{congruence relation}. Compatibility with the algebraic structure operations
-means that algebraic operations applied on equivalent elements will still
-yield equivalent elements. 
-
-
-
-%===================================================================================
-
-We omit the coalgebraic definition for \textit{linear weighted automata} seen in 
-\cite{BONCHI201277} and give a more intuitive definition. 
-In this implementation, we focus only on weighted automata defined over 
-the field of real numbers $\R$. 
-
-\begin{defn}
-  A \textit{linear weighted automaton} (in short, LWA) over the field $\K$ and an alphabet $A$
-  is a triple  $L = (V, o, \left\lbrace t_a \right\rbrace_{a \in A})$ 
-  where $V$ is a vector space representing the state space, 
-  $o: V \to \K$ is a linear map associating to each state its output weight,
-  and $t = \left\lbrace t_a = V \times V \right\rbrace_{a \in A}$ is
-  the set of transition functions, represented with liner maps 
-  that for each input $a \in A$ associate the next state, in this case a vector
-  in $V$.
-  As in \cite{boreale2009weighted}, we have that $\dim{(L)} = \dim{(V)}$.
-\end{defn}
-
-Given a weighted automaton, one can build an isomorphic linear weighted automaton
-by considering the free vector space generated by the set of states $X$ in the WA,
-and by linearizing $o$ and $t$. If $X$ is finite, we can use the same matrices for 
-$t$ and $o$ in both the WA and the corresponding LWA.
-We are only considering a finite number of states and therefore finite dimensional
-vector spaces. Let $n$ be the (finite) number of states in an WA.
-We have that in the corresponding LWA, the transition functions $t_a$ are still
- represented as
-$\K^{n \times n}$ matrices. $o \in \K^{1 \times n}$ is represented as a row vector.
-$t_a(v)$ denotes the vector obtained by multiplying the matrix $t_a$ by the column 
-vector $v  \in \K^{n \times 1}$. $o(v)$ denotes the scalar $s \in \K$ obtained by 
-dot product of the row vector $o$ with $v \in \K^{n \times 1}$.
-
-\begin{defn}
-  The language recognized by a vector $v \in V$ of an LWA $(V,o,t)$ is defined
-  for all words $w \in A*$ as $\langlwa{v}{V}(w) = o(v_n)$ where $v_n$ is the 
-  vector reached from $v$ through the composition of the transition functions
-  corresponding to the words in $w$.
-  
-  \begin{equation*}
-    \begin{aligned}
-      \langlwa{v}{V}(w) = \begin{cases}
-        o(v) & \text{if } w = \epsilon \\ 
-        \langlwa{t_a(v)}{V}(w') & \text{if } w = aw' 
-      \end{cases}
-    \end{aligned}
-  \end{equation*}
-  
-\end{defn}
-
-
-We define $\llwb$ as the behavioral equivalence for a given LWA $(V, o, t)$ as 
-
-\begin{equation}
-  \forall v_1, v_2 \in V, \; v_1 \llwb v_2 \iff \langlwa{v_1}{V} = \langlwa{v_2}{V}
-\end{equation}
-
-
-\begin{lem}
-  $\llwb$ coincides with $\sim_l$: 
-
-  Let $(X, o, t)$ be a WA and $(\K^X, o^\sharp, t^\sharp)$ the corresponding linear 
-  weighted automaton. Then $\forall x \in X, \;\; \sqmap{x} = \langlwa{x}{\K^X}$
-\end{lem}
-
-\begin{proof}
-  Proved in section 3.3 of \cite{BONCHI201277}
-\end{proof}
-
-Language equivalence can be expressed in terms of linear weighted bisimulations (LWBs for short).
-Differently from weighted bisimulations, LWBs can be seen both as relations and as subspaces.
-The subspace representation of LWBs is used in the backwards partition refinement algorithm 
-implemented in \cite{BONCHI201277} and in this work.
+\input{sections/notation.tex}
 
 %=========================================================================
 
 
-\section{The Problem}
-We want to check if two vectors are language equivalent $v_1 \sim_l v_2$.
-
-\section{Algorithms}
-
-
-We now recall the backwards algorithm for computing $\llwb$ defined in \cite{BONCHI201277}.
-
-\subsection{Backwards Partition Refinement Algorithm for the Largest Weighted Bisimulation}
-\label{sec:algo2}
-
-The algorithm is defined by the iterative method:
-\begin{eqnarray}
-  R_0 = \mker{o}^0, & \quad & R_{i+1} = R_i + \sum_{a \in A} t_a^t(R_i) \label{back} 
-\end{eqnarray}
-Where $\mker{o}^0$ is an annihilator.
-The algorithm stops when $R_{j+1} = R_j$. An index $j \leq \dim(V)$ is 
-guaranteed to exist, such that the algorithms terminates at step $j$.
-It follows that $\llwb \equiv R_j^0$.
-Proof is available in section 4.2 of \cite{BONCHI201277}
+\input{sections/algorithms.tex}
 
 
 
-%\subsection{Forward Partition Refinement Algorithm for the Largest Weighted Bisimulation}
-%\label{sec:algo2}
-%
-%The algorithm is defined by the iterative method:
-%\begin{eqnarray}
-%  R_0 = \mker{o}, & \quad & R_{i+1} = R_i \cap \bigcap_{a \in A} t_a(R_i)^{-1} \label{fwd} 
-%\end{eqnarray}
-%The algorithm stops when $R_{j+1} = R_j$. Proof is available in section 4.1 of \cite{BONCHI201277}
 
 \section{Implementation}
 \label{sec:impl}
@@ -399,30 +249,30 @@ column space of $A$. Proof is available in \cite{ila}.
 %=============================================================
 
 
-\begin{figure}
-  \centering
-  \fbox{\rule[-.5cm]{4cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-  \caption{Sample figure caption.}
-  \label{fig:fig1}
-\end{figure}
+%\begin{figure}
+%  \centering
+%  \fbox{\rule[-.5cm]{4cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+%  \caption{Sample figure caption.}
+%  \label{fig:fig1}
+%\end{figure}
 
 
-\begin{table}
- \caption{Sample table title}
-  \centering
-  \begin{tabular}{lll}
-    \toprule
-    \multicolumn{2}{c}{Part}                   \\
-    \cmidrule(r){1-2}
-    Name     & Description     & Size ($\mu$m) \\
-    \midrule
-    Dendrite & Input terminal  & $\sim$100     \\
-    Axon     & Output terminal & $\sim$10      \\
-    Soma     & Cell body       & up to $10^6$  \\
-    \bottomrule
-  \end{tabular}
-  \label{tab:table}
-\end{table}
+%\begin{table}
+% \caption{Sample table title}
+%  \centering
+%  \begin{tabular}{lll}
+%    \toprule
+%    \multicolumn{2}{c}{Part}                   \\
+%    \cmidrule(r){1-2}
+%    Name     & Description     & Size ($\mu$m) \\
+%    \midrule
+%    Dendrite & Input terminal  & $\sim$100     \\
+%    Axon     & Output terminal & $\sim$10      \\
+%    Soma     & Cell body       & up to $10^6$  \\
+%    \bottomrule
+%  \end{tabular}
+%  \label{tab:table}
+%\end{table}
 
 
 
@@ -458,5 +308,8 @@ column space of $A$. Proof is available in \cite{ila}.
 % \end{thebibliography}
 % 
 % 
+\appendix
+
+%\input{sections/appendix.tex}
 \end{document}
  

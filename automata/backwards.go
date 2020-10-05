@@ -20,37 +20,19 @@ func (a *Automaton) BackwardsPartitionRefinement() {
 	// lastIndex := 0
 
 	for i := 1; i <= a.Dim; i++ {
-		// fmt.Printf("==============================\nstep %d\n", i)
 		// Σ_{a \in A} T_a^t(R_i)
 		for _, sym := range a.A {
-			//_, n := lastBasis.Dims()
-			// if lastIndex == n {
-			// break
-			// }
-			// toCompute := lastBasis.Slice(0, a.Dim, lastIndex, n).(*mat.Dense)
 			newBasis := a.ApplyTransposeTransitionBasis(sym, lastBasis)
-			// fmt.Printf("T_(%s)^t of \n%s \n = \n", sym, lin.StringMat(lastBasis))
-			// lin.PrintMat(newBasis)
 			currBasis = lin.Union(currBasis, newBasis)
-			// fmt.Println("curr basis = ")
-			// lin.PrintMat(currBasis)
-
 			currBasis = lin.OrthonormalColumnSpaceBasis(currBasis, a.Tol).(*mat.Dense)
-			// fmt.Printf("orthonormal basis of col space of b = \n%s\n", lin.StringMat(currBasis))
 		}
 
-		//if i > 1 && mat.Equal(lastBasis, currBasis) {
-		//	break
-		//}
-		// _, lastIndex = lastBasis.Dims()
-		// _, currSize := currBasis.Dims()
-		// fmt.Printf("B_%d has size %d \n", i-1, lastIndex)
-		// fmt.Printf("B_%d has size %d \n", i, currSize)
 		lastBasis = currBasis
 	}
 
 	a.LLWBperp = currBasis
-	//a.LLWB = lin.Complement(currBasis).(*mat.Dense)
+	// we could compute the orthogonal complement to find a basis of LLWB:
+	// a.LLWB = lin.Complement(currBasis).(*mat.Dense)
 }
 
 func (a Automaton) BPREquivalence(v1, v2 *mat.VecDense) bool {
