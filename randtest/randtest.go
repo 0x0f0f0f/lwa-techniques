@@ -2,6 +2,7 @@ package randtest
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 
 	"github.com/0x0f0f0f/lwa-techniques/automata"
@@ -9,110 +10,88 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-const tol = 10e-12
+func BatchTest(opt *BatchTestOptions) BatchResult {
+	batchResults := BatchResult{opt: opt}
 
-type TestOptions struct {
-	Dim        int
-	NumSymbols int
-	NumSamples int
-	MaxWeight  int
-	Mode       string
+	for i := 0; i < opt.NumAutomata; i++ {
+		fmt.Printf("testing automata %20d...\r", i)
+
+		batchResults.Accumulate(TestRandAutomaton(opt.AutOptions))
+	}
+
+	fmt.Println()
+	batchResults.ComputeStats()
+	return batchResults
+
 }
 
-type TestResults struct {
-	// number of samples on which language equivalence
-	// is verified by both HKC and BPR
-	Verified float64
-	// number of samples on which bpr equivalence is verified
-	Bprt float64
-	// number of samples on which hkc equivalence is verified
-	Hkct float64
-	// true if the LLWB computed by BPR is empty
-	Null bool
-}
-
-func RandTest(o TestOptions) TestResults {
+func TestRandAutomaton(o *AutomatonTestOptions) AutomatonResult {
 	var az automata.Automaton
 
 	switch o.Mode {
 	case "real":
-		az = automata.RandAutomaton(o.NumSymbols, o.Dim, float64(o.MaxWeight), tol)
+		az = automata.RandAutomaton(o.NumSymbols, o.NumStates, float64(o.MaxWeight))
 
 	case "nat":
-		az = automata.RandNatAutomaton(o.NumSymbols, o.Dim, o.MaxWeight, tol)
+		az = automata.RandNatAutomaton(o.NumSymbols, o.NumStates, o.MaxWeight)
 
 	default:
 		panic(errors.New("unknown mode"))
 	}
+	az.BPRTol = o.BPRTol
+	az.HKCTol = o.HKCTol
 
 	// fmt.Println(az)
 	az.BackwardsPartitionRefinement()
 
-	lin.CleanTolDense(az.LLWBperp, tol)
-
 	samples := make([]*mat.VecDense, o.NumSamples)
-	llwb := lin.Complement(az.LLWBperp, tol).(*mat.Dense)
+	randoms := make([]*mat.VecDense, o.NumSamples)
+	llwb := lin.Complement(az.LLWBperp, o.BPRTol).(*mat.Dense)
 	_, dimLLWB := llwb.Dims()
 
-	lin.CleanTolDense(llwb, tol)
+	lin.CleanTolDense(llwb, o.BPRTol)
 
-	if mat.Equal(llwb, mat.NewDense(o.Dim, 1, nil)) {
-		return TestResults{
-			Verified: 0,
-			Bprt:     0,
-			Hkct:     0,
-			Null:     true,
+	if mat.Equal(llwb, mat.NewDense(o.NumStates, 1, nil)) {
+		return AutomatonResult{
+			Null: true,
 		}
 	}
 
 	//lin.PrintMat(llwb)
 
-	results := TestResults{Null: false}
+	autResult := AutomatonResult{Null: false}
 
 	for i := range samples {
 		samples[i] = lin.LinearCombination(llwb, lin.RandVec(dimLLWB, 100))
+		randoms[i] = lin.RandVec(az.Dim, 100)
 	}
 
 	for i := range samples {
-		// test for vectors in span of LLWB
 		j := rand.Intn(o.NumSamples)
+		// test for vectors in span of LLWB
 		for j == i {
 			j = rand.Intn(o.NumSamples)
 		}
-		resBPR := az.BPREquivalence(samples[i], samples[j])
-		resHKC, _ := az.HKC(samples[i], samples[j])
-
-		if resBPR {
-			results.Bprt++
-		}
-
-		if resHKC {
-			results.Hkct++
-		}
-
-		if resBPR == resHKC {
-			results.Verified++
-		}
-
+		autResult.Accumulate(TestSamplePair(az, samples[i], samples[j]))
 		// test for totally random vectors
-		w1 := lin.RandVec(az.Dim, 100)
-		w2 := lin.RandVec(az.Dim, 100)
+		autResult.Accumulate(TestSamplePair(az, samples[i], samples[j]))
 
-		resBPR = az.BPREquivalence(w1, w2)
-		resHKC, _ = az.HKC(w1, w2)
-
-		if resBPR {
-			results.Bprt++
-		}
-
-		if resHKC {
-			results.Hkct++
-		}
-
-		if resBPR == resHKC {
-			results.Verified++
-		}
 	}
 
-	return results
+	return autResult
+}
+
+func TestSamplePair(az automata.Automaton, v1, v2 *mat.VecDense) int {
+	BPReq := az.BPREquivalence(v1, v2)
+	HKCeq, _ := az.HKC(v1, v2)
+
+	if BPReq && HKCeq {
+		return TP // true positive
+	} else if !BPReq && !HKCeq {
+		return TN // true negative
+	} else if !BPReq && HKCeq {
+		return FP // false negative
+	} else {
+		return FN // false positive
+	}
 }

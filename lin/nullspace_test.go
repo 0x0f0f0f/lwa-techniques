@@ -15,7 +15,7 @@ func TestNullspace(t *testing.T) {
 		4.0, 5.0, 6.0,
 		7.0, 8.0, 9.0,
 	})
-	ker, res := Nullspace(a)
+	ker, res := Nullspace(a, test_tol)
 
 	//fmt.Printf("%.60e\n", res)
 
@@ -38,7 +38,7 @@ func TestNullspace2(t *testing.T) {
 			1, 7, 2,
 			-2, 3, 1,
 		})
-	ker, _ := Nullspace(a)
+	ker, _ := Nullspace(a, test_tol)
 
 	expker := mat.NewDense(3, 1,
 		[]float64{

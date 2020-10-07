@@ -25,7 +25,7 @@ func (a *Automaton) BackwardsPartitionRefinement() {
 			newBasis := a.ApplyTransposeTransitionBasis(sym, lastBasis)
 			currBasis = lin.Union(currBasis, newBasis)
 		}
-		currBasis = lin.OrthonormalColumnSpaceBasis(currBasis, a.Tol).(*mat.Dense)
+		currBasis = lin.OrthonormalColumnSpaceBasis(currBasis, a.BPRTol).(*mat.Dense)
 
 		lastBasis = currBasis
 	}
@@ -50,5 +50,5 @@ func (a Automaton) BPREquivalence(v1, v2 *mat.VecDense) bool {
 	mul.Reset()
 	mul.MulVec(a.LLWBperp.T(), sub)
 
-	return lin.IsZeroTol(mul, a.Tol)
+	return lin.IsZeroTol(mul, a.BPRTol)
 }

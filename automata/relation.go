@@ -78,7 +78,7 @@ func (r *Relation) Add(p *mat.Dense) {
 	_, un := r.u.Dims()
 	for j := 0; j < un; j++ {
 		v := r.u.ColView(j).(*mat.VecDense)
-		if lin.EqVecTol(v, sub, r.tol) {
+		if mat.EqualApprox(v, sub, r.tol) {
 			subInU = true
 		}
 	}
@@ -101,7 +101,7 @@ func (r Relation) PairIsInCongruenceClosure(p *mat.Dense) bool {
 	_, un := r.u.Dims()
 	for j := 0; j < un; j++ {
 		v := r.u.ColView(j).(*mat.VecDense)
-		if lin.EqVecTol(v, sub, r.tol) {
+		if mat.EqualApprox(v, sub, r.tol) {
 			return true
 		}
 	}

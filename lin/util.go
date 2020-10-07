@@ -34,14 +34,6 @@ func IsZeroTol(vec *mat.VecDense, tol float64) bool {
 	return true
 }
 
-// returns true if two vectors are equal with a tolerance of tol
-func EqVecTol(a, b mat.Vector, tol float64) bool {
-	sub := mat.VecDenseCopyOf(a)
-	sub.SubVec(a, b)
-
-	return IsZeroTol(sub, tol)
-}
-
 // create an n*n identity matrix
 func EyeDense(n int) *mat.Dense {
 	a := mat.NewDense(n, n, nil)

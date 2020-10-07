@@ -24,13 +24,14 @@ type Automaton struct {
 	// with LLWBperp, we denote a basis of the orthogonal
 	// complement of the basis LLWB
 	LLWBperp *mat.Dense
-	Tol      float64 // tolerance value
+	BPRTol   float64 // tolerance value for BPR
+	HKCTol   float64 // tolerance value for HKC
 }
 
 // applies the output function to a given state vector (o * v)
-func (a Automaton) GetOutput(v *mat.VecDense) float64 {
+func (a Automaton) GetOutput(v *mat.VecDense, tol float64) float64 {
 	res := mat.Dot(a.O, v)
-	if math.Abs(res) < a.Tol {
+	if math.Abs(res) < tol {
 		res = 0.0
 	}
 	return res

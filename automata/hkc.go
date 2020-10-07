@@ -30,8 +30,8 @@ func (a Automaton) HKC(v1, v2 *mat.VecDense) (bool, error) {
 			continue
 		}
 
-		o1 := a.GetOutput(PairLeft(q))
-		o2 := a.GetOutput(PairRight(q))
+		o1 := a.GetOutput(PairLeft(q), a.HKCTol)
+		o2 := a.GetOutput(PairRight(q), a.HKCTol)
 		if o1 != o2 {
 			return false, nil
 		}

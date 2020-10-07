@@ -97,7 +97,7 @@
   breaklines, breakatwhitespace=true
 }
 
-\title{DRAFT: Go Implementation of Up-To Techniques for Weighted Language Equivalence}
+\title{DRAFT: Go Implementation of Techniques for Weighted Language Equivalence}
 
 %\thanks{Use footnote for providing further
 %information about author (webpage, alternative
@@ -129,13 +129,18 @@
 \begin{abstract}
 Weighted automata generalize non-deterministic automata by adding
 a quantity expressing the weight (or probability) of the execution of each transition.
-In this work we propose an implementation of two algorithms for computing language 
-equivalence in finite state weighted automata (WAs). The first, a
-linear partition refinement algorithm, computes the largest linear weighted bisimulation
-for any given LWA (Linear Weighted Automaton) through an iterative method, 
-the second algorithm checks the language equivalence 
-of two vectors (states) for a given weighted automata by using an additional
+In this work we propose an implementation of two algorithms for computing
+the language equivalence relation in finite state weighted automata (WAs). 
+The first algorithm checks the language equivalence 
+of two vectors (states) in a weighted automaton, 
+with an up-to technique by using an additional
 data structure representing a congruence relation.
+The second algorithm, a
+linear partition refinement algorithm, computes the 
+whole equivalence relation, precisely the
+largest linear weighted bisimulation,
+by linearizing the state space and iteratively refining
+the relation. 
 We then compare results of the two algorithms to verify their correctness
 and performance on randomly generated samples. 
 We finally provide a comparison and runtime statistics.

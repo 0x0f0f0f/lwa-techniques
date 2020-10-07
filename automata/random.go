@@ -8,7 +8,7 @@ import (
 )
 
 // generate a random automaton on natural numbers
-func RandNatAutomaton(syms, states, maxweight int, tol float64) Automaton {
+func RandNatAutomaton(syms, states, maxweight int) Automaton {
 	// create the alphabet
 	A := make([]string, syms)
 	if syms <= 57 {
@@ -33,14 +33,13 @@ func RandNatAutomaton(syms, states, maxweight int, tol float64) Automaton {
 		T:   T,
 		O:   O,
 		Dim: states,
-		Tol: tol,
 	}
 
 	return aut
 }
 
 // generate a random automaton on real numbers
-func RandAutomaton(syms, states int, maxweight float64, tol float64) Automaton {
+func RandAutomaton(syms, states int, maxweight float64) Automaton {
 	// create the alphabet
 	A := make([]string, syms)
 	if syms <= 57 {
@@ -65,7 +64,6 @@ func RandAutomaton(syms, states int, maxweight float64, tol float64) Automaton {
 		T:   T,
 		O:   O,
 		Dim: states,
-		Tol: tol,
 	}
 
 	return aut

@@ -3,7 +3,6 @@ package automata
 import (
 	"errors"
 
-	"github.com/0x0f0f0f/lwa-techniques/lin"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -57,8 +56,8 @@ func PairEqs(p, p1 *mat.Dense, tol float64) bool {
 	}
 	eq := true
 	for i := 0; i < 2; i++ {
-		eq = eq && lin.EqVecTol(p.ColView(i), p1.ColView(i), tol)
-		eq = eq && lin.EqVecTol(p.ColView(i), p1.ColView(2-i), tol)
+		eq = eq && mat.EqualApprox(p.ColView(i), p1.ColView(i), tol)
+		eq = eq && mat.EqualApprox(p.ColView(i), p1.ColView(2-i), tol)
 	}
 
 	return eq
