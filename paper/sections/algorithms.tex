@@ -6,7 +6,7 @@ It was first introduced by
 Bonchi and Pous in \cite{bonchi2013checking}.
 The algorithm, extending the Hopcroft and Karp procedure 
 \cite{hopcroft1971linear} with \textit{congruence closure}, is 
-proven to be sound and complete \cite{DBLP:journals/corr/Bonchi0K17}.
+proven to be sound and complete.
 It is defined for 
 WAs over semirings, but in this implementation we are only 
 considering fields, in particular 
@@ -23,40 +23,51 @@ and it does so without linearizing the state space.
 
 We compare \texttt{HKC} with an algorithm called 
 \textit{Backwards Partition Refinement}, that we will call BPR for short. 
-
 Adapted from \cite{BONCHI201277}, 
-\texttt{BPR}, or \textit{Backwards Partition Refinement}
+\texttt{BPR}
 is a fixed-point iterative method that, given an LWA
-$L = (V, t, o)$, it computes the whole 
-
-computes a basis of the subspace of $V$
+$L = (V, t, o)$, computes a basis of the subspace of $V$
 representing the complementary relation of $\llwb$ (we later show it to be the 
 orthogonal complement in case $V$ is an inner product space). 
 Another version of the algorithm is defined in the same work,
 called \textit{Forward Partition Refinement}, which directly computes
 a basis for $\llwb$ but is shown to be way less efficient than the backwards version.
-The advantage of the backwards
-It has been first introduced in \cite{boreale2009weighted}.
-Our implementation is directly modeled on the algorithm shown in 
-\cite{boreale2009weighted}, since we are fixing the field 
-to $\R$ and computing the orthogonal complements instead of 
-dual spaces and annihilators. In \cite{BONCHI201277}, the authors 
-extended.
 
+Our implementation is directly modeled on the algorithm shown in 
+\cite{boreale2009weighted}, since we are fixing weights on $\R$ and computing the orthogonal complements instead of 
+dual spaces and annihilators. 
 
 \begin{note}
-    Recall from section \ref{sec:notation} that $\llwb$ is a linear relation, 
-    therefore $v_1 \llwb v_2 \iff (v_1 - v_2) \in \mker{\llwb}$
+  Recall from section \ref{sec:notation} that $\llwb$ is a linear relation, 
+  therefore $v_1 \llwb v_2 \iff (v_1 - v_2) \in \mker{\llwb}$
 \end{note}
 
 
-The \texttt{BPR} algorithm starts from a relation $R_0$, that is the complement 
+From Lemma \ref{lem:coincide}, it follows that given an LWA $L = (V,o,t)$ and a corresponding
+basis of $\llwb$ computed by BPR, one can check language equivalence 
+of two vectors in the state space, $v_1 \sim_l v_2 $,  by checking if $(v_1 - v_2) \in \mker{\llwb}$.
+Therefore, we can say that BPR "\textit{minimizes}", or it computes the whole
+binary linear relation $\llwb$, coinciding with $\sim_l$.
+
+
+
+The \texttt{BPR} algorithm starts from the basis of a relation $R_0$, that is the complement 
 of the relation identifying vectors with equal weights.
 It then incrementally computes the space of all states that are reachable from 
 $R_0$ in a \textit{backwards} direction. Intuitively, "going backwards" means 
 working with the transpose transitions functions $t_a^T$.
 
-In the next sections we will compare execution of our implementation of the algorithms
+\texttt{BPR} has a cost of $O(n^4)$ operations 
+to initially compute the largest linear weighted bisimulation,
+which can be eventually reduced to $O(n^3)$ \cite{BONCHI201277}.
+In our implementation, by initially computing a basis of the orthogonal complement of $\llwb$,
+the cost of checking if two vectors are language equivalent is then reduced to the
+cost of matrix multiplication ($O(n^2)$). It follows that 
+\texttt{BPR} is a great choice when we
+have to decide if a large number of vectors in a WA are language equivalent.
+
+
+In the next sections we will compare execution results of our implementation of the algorithms
 \texttt{BPR} and \texttt{HKC} to verify correctness,
 and to provide insight on runtime results.
 Lemma \ref{lem:coincide}, introduced above, is key to our work. By stating that 
@@ -68,20 +79,13 @@ compute an answer for same the decision problem:
 \end{center}
 
 %TODO
-TODO costo computazionale HKC.
+%TODO costo computazionale HKC.
 
-\texttt{BPR} has a cost of $O(n^4)$ operations 
-to initially compute the largest linear weighted bisimulation,
-which can be eventually reduced to $O(n^3)$ \cite{BONCHI201277}.
-In our implementation, by initially computing a basis of the orthogonal complement of $\llwb$,
-the cost of checking if two vectors are language equivalent is then reduced to the
-cost of matrix multiplication ($O(n^2)$). \texttt{BPR} is a great choice when we
-have to decide if a large number of vectors in a WA are language equivalent.
 
 %=========================================================================
 
 \subsection{HKC Algorithm}
-We give a pseudocode definition of the \texttt{HKC} procedure:
+We give the pseudocode definition of the \texttt{HKC} procedure from \cite{DBLP:journals/corr/Bonchi0K17}:
 
 \captionof{figure}{The \texttt{HKC}($v_1, v_2$) procedure}
 \lstinputlisting[escapeinside={(*}{*)}]{hkc.txt}
@@ -96,7 +100,14 @@ The algorithm is defined by the iterative method:
   R_0 = \mker{o}^0, & \quad & R_{i+1} = R_i + \sum_{a \in A} t_a^T(R_i) \label{back} 
 \end{eqnarray}
 Where $\mker{o}^0$ is an annihilator.
+
+\begin{note}
+  Given two vector spaces $V_1, V_2$ we write $V_1 + V_2$ to 
+  denote $\mspan{V_1 \cup V_2}$
+\end{note}
+
+
 The algorithm stops when $R_{j+1} = R_j$. An index $j \leq \dim(V)$ is 
-guaranteed to exist, such that the algorithms terminates at step $j$.
+guaranteed to exist, such that the algorithms stops at step $j$.
 It follows that $\llwb = R_j^0$.
 Proof is available in section 4.2 of \cite{BONCHI201277}

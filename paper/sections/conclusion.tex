@@ -1,4 +1,37 @@
 \section{Conclusion and Future Work}
 
-%TODO 
-TODO da fare
+
+During the testing phase, we have found that on randomly generated automata 
+over the $\R$ field, the probability of BPR returning an empty basis of $\llwb$
+increases together with the number of states in the automaton, and the number of
+ symbols in the alphabet.
+In a given linear weighted automaton $L = (V, o,t )$
+over the $\R$ field and an alphabet $A$, the chance of BPR returning an empty basis also
+increases together with the maximum weight in modulo of the transition matrices,
+$\forall a \in A, \; \max |(t_a)_{ij}|$, for $i,j=1\hdots,n$, with 
+$n = \dim(V)$. Authors of \cite{BONCHI201277} have confirmed
+that it is normal for this to happen and that this fact is not due
+to an implementation error.
+
+Since the tests in this work rely heavily on a non-empty basis of $\llwb$ to generate
+language equivalent vectors, the automata with an empty $\mker{\llwb}$ had to be ignored during the 
+tests. This introduced substantial overhead as the chance of BPR returning an empty basis 
+grew closer to 1, together with the various parameter of the automata: 
+most of the computing time was spent on generating and running BPR on automata which did
+not contain any language equivalent vectors, making tests on large automata not possible.
+
+To provide better runtime results for the language equivalence problem, 
+a topic worth further attention is the development of a semi-randomized method to 
+generate structured large sized automata that have a low chance of BPR
+returning an empty basis of $\llwb$.
+
+
+Another idea for the future of this implementation, is the addition
+of a \texttt{Semiring} interface type that would permit much more insightful analysis
+on weighted automata, not only on the field of real numbers.  
+
+To further verify of the algorithms implemented in this work, 
+and any additional algorithm that may be implemented, 
+one could compare the results of this package with the results 
+of the PAWS tool for the analysis of weighted systems \cite{konig2017paws}, developed 
+at the University of Duisburg-Essen.

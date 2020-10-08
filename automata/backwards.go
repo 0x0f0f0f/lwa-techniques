@@ -10,14 +10,15 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// compute and store a basis for the largest linear weighted bisimulation of
-// the linear weighted automaton
-func (a *Automaton) BackwardsPartitionRefinement() {
+// BackwardsPartitionRefinement computes and stores a basis for the
+// largest linear weighted bisimulation of
+// the linear weighted automaton. returns the condition number
+func (a *Automaton) BackwardsPartitionRefinement() float64 {
 	// i = 0
 	lastBasis := mat.NewDense(a.Dim, 1, a.O.RawVector().Data)
 	currBasis := lastBasis
-	// index of the column of last basis that has already been computed
-	// lastIndex := 0
+	// condition number
+	lastCond := 0.0
 
 	for i := 1; i <= a.Dim; i++ {
 		// \sum_{a \in A} T_a^T(R_i)
@@ -25,18 +26,23 @@ func (a *Automaton) BackwardsPartitionRefinement() {
 			newBasis := a.ApplyTransposeTransitionBasis(sym, lastBasis)
 			currBasis = lin.Union(currBasis, newBasis)
 		}
-		currBasis = lin.OrthonormalColumnSpaceBasis(currBasis, a.BPRTol).(*mat.Dense)
-
+		tmp, cond := lin.OrthonormalColumnSpaceBasis(currBasis, a.BPRTol)
+		currBasis = tmp.(*mat.Dense)
 		lastBasis = currBasis
+		lastCond = cond
 	}
+
+	// fmt.Println(lastCond)
 
 	a.LLWBperp = currBasis
 	// we could compute the orthogonal complement to find a basis of LLWB:
 	// a.LLWB = lin.Complement(currBasis).(*mat.Dense)
+	return lastCond
 }
 
-// method that, after an LLWB is computed through BPR,
-// checks the equivalence of 2 vectors
+// BPREquivalence checks the equivalence of 2 vectors
+// after a basis of the LLWB is computed through BPR,
+
 func (a Automaton) BPREquivalence(v1, v2 *mat.VecDense) bool {
 	if a.LLWBperp == nil {
 		log.Fatalln("largest linear weighted bisimulation not computed for automaton")

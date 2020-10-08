@@ -14,26 +14,29 @@ the CPU and accelerated with BLAS and LAPACK.
 
 
 \subsection{Data Structures}
-In this implementation, the data structure for representing weighted automata is a \texttt{struct} containing
-the following attributes:
-\begin{enumerate}
-    \item An integer \texttt{Dim} representing the number of states $n$. 
-    (note: states are finite and indexed on natural numbers $0, \hdots, n-1$)
-    \item A slice of strings representing the \textit{alphabet} $A$.
-    \item A map of strings as keys (the alphabet symbols) and dense $n \times n$ \texttt{float64} matrices as values,
-    representing the set of transition functions.
-    \item A dense \texttt{float64} vector, representing the linearization of the output function. 
-    \item A \texttt{float64} value representing the tolerance to be used in numerical computations.
-    \item An optionally \texttt{nil}, dense floating point matrix providing a basis for the orthogonal 
-    complement of $\llwb$
-\end{enumerate}
+In this implementation, the data structure for representing weighted automata is a \texttt{struct}:
+
+\captionof{figure}{Source code for the Weighted Automaton data structure, found in \texttt{automata/automata.go}}
+\lstinputlisting[language=go]{../automata/automata.go}
+
+%\begin{enumerate}
+%    \item An integer \texttt{Dim} representing the number of states $n$. 
+%    (note: states are finite and indexed on natural numbers $0, \hdots, n-1$)
+%    \item A slice of strings representing the \textit{alphabet} $A$.
+%    \item A map of strings as keys (the alphabet symbols) and dense $n \times n$ \texttt{float64} matrices as values,
+%    representing the set of transition functions.
+%    \item A dense \texttt{float64} vector, representing the linearization of the output function. 
+%    \item A \texttt{float64} value representing the tolerance to be used in numerical computations.
+%    \item An optionally \texttt{nil}, dense floating point matrix providing a basis for the orthogonal 
+%    complement of $\llwb$
+%\end{enumerate}
 \begin{note}
     \textit{Slices} in Go are a convenient and efficient extension of the concept of arrays: 
     they provide an abstraction for indexed, variable length sequences of typed data, and 
     provide useful helper functions for creating, appending and selecting elements. 
 \end{note}
-The definition can be found in file \texttt{automata/automata.go}.
-We then provide methods for reading an automaton from a text stream, applying transition
+
+We then provide methods for reading an automaton from a text stream, applying transitions
 and output functions to vectors, and generating random automata with real and natural valued weights.
 
 
@@ -72,12 +75,11 @@ we check if $(v_1 - v_2)$ is contained in U.
 Given a WA $L$, at the first step of \texttt{BPR}, we set $R_0 = o$, 
 with $o$ being the dense vector representing the output function 
 of $L$, as seen in \cite{BONCHI201277}.
-For each step $i = 0, \hdots, j+1$, with $j \leq \dim(L)$, the implemented algorithm:
+To compute $R_{i+1}$ at each step, the implemented BPR algorithm:
 \begin{enumerate}
-    \item For each $a \in A$ computes $t_a^T(R_i)$ through matrix multiplication
-    \item Concatenates those matrices $t_a^T(R_i)$ to $R_i$ in a resulting matrix $G$ 
-    \item Instead of checking linear independence of the columns through Gaussian elimination,
-    it computes $R_{i+1}$ as the orthonormal basis of the column space of $G$, through singular 
+    \item Computes $t_a^T(R_i)$ through matrix multiplication for each $a \in A$
+    \item Concatenates the resulting matrices to $R_i$ in a resulting matrix $G$ 
+    \item Computes $R_{i+1}$ as the orthonormal basis of the column space of $G$, through singular 
     value decomposition.
 \end{enumerate}
 
@@ -120,7 +122,7 @@ annihilator.
 
 To compute the orthogonal complement of a vector subspace $W$, we
 compute $W^\perp = \mker{A^T}$, where $A$ is the matrix whose column space 
-is $W$. Proof is available in \cite{ila}.
+is $W$.
 
 
 \captionof{figure}{Implementation of Backwards Partition Refinement}

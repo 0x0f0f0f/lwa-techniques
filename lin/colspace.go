@@ -6,16 +6,15 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// compute an orthonormal basis of the column space of a through
-// svd decomposition. Cost is O(n^3)
-func OrthonormalColumnSpaceBasis(a mat.Matrix, tol float64) mat.Matrix {
+// OrthonormalColumnSpaceBasis computes an orthonormal basis of the column space of a through
+// svd decomposition. Cost is O(n^3). Also returns the condition number
+func OrthonormalColumnSpaceBasis(a mat.Matrix, tol float64) (mat.Matrix, float64) {
 	var svd mat.SVD
 	if ok := svd.Factorize(a, mat.SVDFullU); !ok {
 		log.Fatal("failed to factorize A")
 	}
 	u := mat.NewDense(1, 1, nil)
 	u.Reset()
-	//fmt.Println(svd.Cond())
 	svd.UTo(u)
 	//fmt.Println(mat.Cond(a, 2))
 	//fmt.Println(mat.Cond(u, 2))
@@ -32,5 +31,5 @@ func OrthonormalColumnSpaceBasis(a mat.Matrix, tol float64) mat.Matrix {
 	m, _ := u.Dims()
 	//fmt.Println(m, n, j)
 	basis := u.Slice(0, m, 0, j)
-	return basis
+	return basis, svd.Cond()
 }

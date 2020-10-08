@@ -15,12 +15,15 @@ const (
 type BatchTestOptions struct {
 	AutOptions  *AutomatonTestOptions // initial automaton test options
 	NumAutomata int                   // number of automata to generate and test
+	Verbose     bool
 }
 
 func (opt BatchTestOptions) Print() {
-	fmt.Println("========= BATCH OPTIONS ===========")
-	fmt.Println(opt.NumAutomata, "automata")
-	opt.AutOptions.Print()
+	if opt.Verbose {
+		fmt.Println("========= BATCH OPTIONS ===========")
+		fmt.Println(opt.NumAutomata, "automata")
+		opt.AutOptions.Print()
+	}
 }
 
 // BatchResult represents the result of many weighted
@@ -61,15 +64,17 @@ func (r *BatchResult) ComputeStats() {
 }
 
 func (r BatchResult) Print() {
-	r.opt.Print()
-	fmt.Println("========= RESULTS ===========")
-	fmt.Println("LLWP is not empty for", float64(r.opt.NumAutomata)-r.Null, "automata")
-	fmt.Printf("TP: %10d TN: %10d\n", int(r.TP), int(r.TN))
-	fmt.Printf("FP: %10d FN: %10d\n", int(r.FP), int(r.FN))
-	fmt.Printf("accuracy:  %.20g\n", r.Accuracy)
-	fmt.Printf("precision: %.20g\n", r.Precision)
-	fmt.Printf("recall:    %.20g\n", r.Recall)
-	fmt.Printf("F1:        %.20g\n", r.F1)
+	if r.opt.Verbose {
+		r.opt.Print()
+		fmt.Println("========= RESULTS ===========")
+		fmt.Println("LLWP is not empty for", float64(r.opt.NumAutomata)-r.Null, "automata")
+		fmt.Printf("TP: %10d TN: %10d\n", int(r.TP), int(r.TN))
+		fmt.Printf("FP: %10d FN: %10d\n", int(r.FP), int(r.FN))
+		fmt.Printf("accuracy:  %.20g\n", r.Accuracy)
+		fmt.Printf("precision: %.20g\n", r.Precision)
+		fmt.Printf("recall:    %.20g\n", r.Recall)
+		fmt.Printf("F1:        %.20g\n", r.F1)
+	}
 }
 
 type AutomatonTestOptions struct {

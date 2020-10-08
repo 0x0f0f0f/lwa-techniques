@@ -1,44 +1,57 @@
 \section{Runtime Results}
 
-TODO da fare e sistemare.
+%TODO da fare e sistemare.
 
+%\subsection{Tolerance and F1 Score}
+The first runtime result we introduce is the study of the influence 
+of the tolerance value choice over the correctness of the algorithms results.
+Tests took place on randomly generated automata. A basis of  $\llwb$ was 
+computed for each automaton with BPR. An arbitrary number of vector pairs were generated 
+as a random linear combination of the vectors in the spanning set of $\llwb$. 
+An identical quantity of completely random vector pairs were generated.
+BPREquivalence and HKC procedures were then executed with those pairs in input.
+
+By defining pairs of vectors as 
+
+\begin{itemize}
+    \item \textit{true positives} (TP) if reported as language equivalent by both 
+    procedures
+    \item \textit{true negatives} (TN) if reported as not language equivalent by both 
+    procedures
+    \item \textit{false positives} (FP) if reported as language equivalent by HKC but not by BPR
+    \item \textit{false negatives} (FN) if reported as  language equivalent by BPR but not by HKC
+\end{itemize}
+
+
+We have introduced \textit{accuracy, precision, recall} and \textit{F1 score} over 
+the tests results: 
+
+\begin{equation*}
+    \begin{aligned}
+        \text{Accuracy} = \dfrac{TP + TN}{TP + TN + FP + FN} & \quad & 
+        \text{Recall} = \dfrac{TP}{TP + FN} \\ && \\
+        \text{Precision} = \dfrac{TP}{TP + FP} & \quad &
+        \text{F1} = 2 * \dfrac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}  \\ && \\
+    \end{aligned}
+\end{equation*}
+
+We have then collected 
+the F1 score in relation to varying tolerance values.
+The plot is shown in Figure \ref{fig:f1}.  
 The program was executed on an x86\_64 AMD Ryzen 5 2600X Six Core CPU, running at 3.6GHz with 32GB RAM, 
-running Void Linux. 
-For 3 test runs on 100000 automata composed of 4 states, 2 alphabet symbols and transition
-matrices with weights on natural numbers $\leq 3$, with a tolerance of 10e-14,
-we found a non empty kernel of $\llwb$ for an average of 1718 automata.
+running Void Linux. Executed sequentially, F1 score tests took 2m26.19s
+Parallelized with a worker pool, the tests took 1m13.12s.
 
-%TODO
-(TODO spiega: più aumentano i simboli/stati più si riduce la probabilità di 
-trovare $\llwb$ non vuoto?? investiga, trova un modo di generare automi con LLWB 
-non vuoto)
+% //TODO: condizionamento BPR
+TODO: BPR conditioning
 
-By generating 1000 random couples of language equivalent vectors $(v_1, v_2)$ such that
-$(v_1 - v_2) \in \mker{\llwb}$ and 1000 couples of completely random vectors
-$(w_1, w_2)$, for each automata, we verified with 100\% confidence that:
-
-\begin{center}
-    $v_1 \; R_j \; v_2 \iff$ \texttt{HKC}$(v_1, v_2) =$ \texttt{true}
-\end{center}
-
-Where $R_j$ is the largest linear weighted bisimulation $\llwb$ computed by \texttt{BPR}.
-
-%TODO
-
-Sample output (19992 KBs in memory):
-\begin{verbatim}
-    $ time go run main.go 
-    tests completed            100000...
+\begin{figure}[htbp!]
+    \centering
+    \includegraphics[width=.8\textwidth]{./plots/f1-tol.pdf}
     
-    1000 samples per automaton
-    100000 automata
-    LLWP is not empty for 1726 automata
-    language equivalence HKC = BPR for 3452000 samples
-    BPR equivalence verified for 1726000 samples
-    HKC equivalence verified for 1726000 samples
-    confidence is 100%
-    
-    real    0m21.322s
-    user    0m23.614s
-    sys     0m0.961s
-\end{verbatim}
+    \caption{F1 score over tolerance tests, 1000 vector pairs tested per automaton.}
+    \label{fig:f1}
+\end{figure}
+
+
+TODO empty LLWB chance, memory and time plots, varying automata size parameters

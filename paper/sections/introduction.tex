@@ -1,18 +1,48 @@
 \section{Introduction}
 \label{sec:intro}
-TODO da fare
 
-Checking whether two nondeterministic finite automata (NFA) accept the same
-language is important in many application domains such as compiler construction and model checking. 
-Unfortunately, solving this problem is costly: it is
-PSPACE-complete (TODO cita) 
-% TODO cita
+Weighted automata (WAs) are a generalization of non-deterministic automata.
+When reading a symbol, a non-deterministic automaton 
+can transition in different states simultaneously. Weighted automata
+introduce \textit{weights} over transitions, which can for example, 
+represent the cost of a transition, 
+or in probabilistic systems, the chance of such transition to happen.
+WAs can be represented with a set of states, an output function and
+a set of transition matrices, indexed over the symbols in the alphabet
+the automaton can read. While those automata are typically defined over semirings,
+our implementation will focus for simplicity on automata with 
+transitions defined over the real number field. 
+The current configuration of a finite weighted automaton $W$,
+defined on $n$ states, will be represented with a column vector of length
+$n$, with values over the semiring or field on which transition weights of the
+automaton $W$ are also defined. 
 
-In \cite{DBLP:journals/corr/Bonchi0K17}, up-to techniques are defined for
-weighted systems over arbitrary semirings, while in \cite{BONCHI201277}, up-to techniques
-are defined for Linear Weighted Automata (LWAs), under a more abstract coalgebraic perspective.
+The goal of this work is to provide an high-performance implementation 
+in the Go programming language of two different techniques 
+to compute \textit{weighted language equivalence}.
+Such equivalence relation is a bisimulation:
+a relation $R$ is a bisimulation whenever two states $v_1, v_2$ in $R$ 
+can simulate each other, resulting in a pair that is still in $R$.
+Two state vectors $v_1, v_2$ in a weighted automaton are said to be 
+weighted language equivalent, written as $v_1 \sim_l v_2$, when 
+they simulate each other by accepting the same words with the same resulting output weights. 
 
-A well detailed example of the comparison of algorithms to compute 
-language equivalence, precisely between \texttt{HKC} and an alternative
-algorithm called the \textit{antichain algorithm} (\cite{de2006antichains}),
+The first technique we implement, 
+defined in \cite{DBLP:journals/corr/Bonchi0K17}, is an up-to technique
+for weighted language equivalence called HKC. It is defined for
+weighted systems over arbitrary semirings and can be implemented with 
+set theoretic constructs. The second technique is defined in \cite{BONCHI201277}:
+a coalgebraic perspective is adopted to define a technique for language equivalence 
+which exploits the linear representation of an automaton. 
+This latter technique "\textit{minimizes}": by linearizing the state space of a
+weighted automaton, 
+it computes a basis for an entire linear relation (see definition \ref{def:linrel})
+which coincides
+with weighted language equivalence.
+This technique for finite weighted automata over fields was first 
+introduced by Michele Boreale in \cite{boreale2009weighted}.
+
+Another example of the comparison between algorithms to compute 
+language equivalence, precisely between HKC and an alternative
+algorithm called the antichain algorithm (\cite{de2006antichains}),
 was published in 2017 \cite{fu2017equivalence}.

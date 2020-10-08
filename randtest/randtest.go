@@ -90,8 +90,8 @@ func TestSamplePair(az automata.Automaton, v1, v2 *mat.VecDense) int {
 	} else if !BPReq && !HKCeq {
 		return TN // true negative
 	} else if !BPReq && HKCeq {
-		return FP // false negative
+		return FP // false positive
 	} else {
-		return FN // false positive
+		return FN // false negative
 	}
 }
