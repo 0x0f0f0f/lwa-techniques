@@ -12,12 +12,14 @@ const (
 	FN            // false negative
 )
 
+// BatchTestOptions represents options for running batch tests on automata
 type BatchTestOptions struct {
 	AutOptions  *AutomatonTestOptions // initial automaton test options
 	NumAutomata int                   // number of automata to generate and test
 	Verbose     bool
 }
 
+// Print batch test options
 func (opt BatchTestOptions) Print() {
 	if opt.Verbose {
 		fmt.Println("========= BATCH OPTIONS ===========")
@@ -63,6 +65,7 @@ func (r *BatchResult) ComputeStats() {
 	r.F1 = 2 * ((r.Precision * r.Recall) / (r.Precision + r.Recall))
 }
 
+// Print results of a batch test
 func (r BatchResult) Print() {
 	if r.opt.Verbose {
 		r.opt.Print()
@@ -77,6 +80,7 @@ func (r BatchResult) Print() {
 	}
 }
 
+// AutomatonTestOptions represents settings for generating random automata
 type AutomatonTestOptions struct {
 	NumStates  int     // Number of states in automata
 	NumSymbols int     // Number of symbols in alphabet
@@ -87,6 +91,7 @@ type AutomatonTestOptions struct {
 	HKCTol     float64 // tolerance for HKC
 }
 
+// Print automaton test options
 func (opt AutomatonTestOptions) Print() {
 	fmt.Println("weight kind:", opt.Mode)
 	fmt.Println("max weight in modulo:", opt.MaxWeight)

@@ -1,4 +1,4 @@
-// This file contains weighted automata data structure definition
+// This file contains weighted automata data structure definitions
 
 package automata
 
@@ -6,6 +6,8 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+// Automaton represents a general finite weighted automaton on the
+// real number field
 type Automaton struct {
 	// The input alphabet slice
 	A []string

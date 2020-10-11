@@ -10,6 +10,8 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+// BatchTest runs a batch test with given options
+// and computes statistics at the end
 func BatchTest(opt *BatchTestOptions) BatchResult {
 	batchResults := BatchResult{opt: opt}
 
@@ -25,7 +27,7 @@ func BatchTest(opt *BatchTestOptions) BatchResult {
 
 }
 
-// Test a random automaton
+// TestRandAutomaton tests a single random automaton with the given options
 func TestRandAutomaton(o *AutomatonTestOptions) AutomatonResult {
 	var az automata.Automaton
 
@@ -82,6 +84,9 @@ func TestRandAutomaton(o *AutomatonTestOptions) AutomatonResult {
 	return autResult
 }
 
+// TestSamplePair tests two of vectors for language equivalence
+// compares the results and returns the corresponding number for identifying
+// if the result is true/false positive/negative
 func TestSamplePair(az automata.Automaton, v1, v2 *mat.VecDense) int {
 	BPReq := az.BPREquivalence(v1, v2)
 	HKCeq, _ := az.HKC(v1, v2)

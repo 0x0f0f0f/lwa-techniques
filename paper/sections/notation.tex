@@ -86,13 +86,14 @@ the field of real numbers $\R$.
   A \textit{linear weighted automaton} (in short, LWA) over the field $\K$ and 
   an alphabet $A$
   is a triple  $L = (V, o, \left\lbrace t_a \right\rbrace_{a \in A})$ 
-  where $V$ is a vector space representing the state space, 
+  where $V$ is a vector space representing the state space, and $\dim{(V)} = n$;
+  We have that
   $o: V \to \K$ is a linear map associating to each state its output weight,
-  and $t = \left\lbrace t_a \in \K^{V \times V} \right\rbrace_{a \in A}$ is
+  and $t = \left\lbrace t_a \in \K^{n \times n} \right\rbrace_{a \in A}$ is
   the set of transition functions, represented with liner maps 
   that for each input $a \in A$ associate the next state, in this case a vector
   in $V$.
-  As seen in \cite{boreale2009weighted}, we have that $\dim{(L)} = \dim{(V)}$.
+  As seen in \cite{boreale2009weighted}, we have that $\dim{(L)} = \dim{(V)} = n$.
 \end{defn}
 
 Given a weighted automaton, one can build a corresponding linear weighted automaton

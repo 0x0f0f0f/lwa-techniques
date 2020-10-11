@@ -57,7 +57,7 @@ To represent the congruence relation $R$, we introduce a \texttt{struct} contain
     \item A dense matrix \texttt{s} of size $n \times 2k$ containing the set of pairs in the relation
     \item A dense matrix \texttt{u} to represent the generating set $U_R$ for the congruence closure (see definition \ref{def:congclos}).
     \item Two integers representing the number of pairs in the set, and the size of vectors.
-    \item A tolerance value to be used in equivalence checks. Best results were obtained with $10^{-14}$.
+    \item A tolerance value to be used in equivalence checks.
 \end{itemize}
 
 When adding a pair of vectors to the congruence relation, we extend the columns
@@ -83,9 +83,9 @@ To compute $R_{i+1}$ at each step, the implemented BPR algorithm:
     value decomposition.
 \end{enumerate}
 
-At the end of \texttt{BPR}, we store the basis for the orthogonal complement
+At the end of \texttt{BPR}, we store $R_j$, the basis for the orthogonal complement
 of $\llwb$ as an attribute of the automaton. To check if two vectors $v_1 \llwb v_2$,
-we check that $R_j^T(v_1 - v_2) = \vec{0}$, with a prefixed tolerance.
+we check that $R_j^T(v_1 - v_2) = \vec{0}$, with a given tolerance.
 
 
 To compute a basis for $\llwb$, at the last step of the algorithm,
@@ -113,10 +113,10 @@ annihilator.
   Every linear functional can be 
   represented with a vector. Let $\xi : V \to \K$ be a functional, 
   $\xi \in  W^0$. Because $\xi(w)=0 \quad \forall  w \in W$, 
-  if $v$ represents $\xi$ we have that $(v, w)=\xi(w)=0$ for all $w \in W$. 
+  if $v$ represents $\xi$ we have that $\langle v, w \rangle =\xi(w)=0$ for all $w \in W$. 
   We obtain that $\varphi(W^0) \subseteq W^{\perp}$.
   If $v \in W^\perp$  
-  then the functional $x \mapsto (v, x)$ cancels over $W$ 
+  then the functional $\xi \mapsto \langle v, x \rangle$ cancels over $W$ 
   (by the definition of orthogonality).
 \end{proof}
 

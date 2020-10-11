@@ -14,6 +14,8 @@ import (
 	"gonum.org/v1/plot/vg"
 )
 
+// F1TolTask runs a test suite on random automata, collects F1 in relation
+// to tolerance values and saves a plot in PDF and PNG format
 func F1TolTask(fixedtol float64) {
 
 	start := time.Now()
