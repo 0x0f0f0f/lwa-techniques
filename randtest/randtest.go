@@ -25,9 +25,11 @@ func BatchTest(opt *BatchTestOptions) BatchResult {
 
 }
 
+// Test a random automaton
 func TestRandAutomaton(o *AutomatonTestOptions) AutomatonResult {
 	var az automata.Automaton
 
+	// choose between random real valued weights or natural
 	switch o.Mode {
 	case "real":
 		az = automata.RandAutomaton(o.NumSymbols, o.NumStates, float64(o.MaxWeight))
@@ -41,14 +43,14 @@ func TestRandAutomaton(o *AutomatonTestOptions) AutomatonResult {
 	az.BPRTol = o.BPRTol
 	az.HKCTol = o.HKCTol
 
-	// fmt.Println(az)
 	az.BackwardsPartitionRefinement()
 
 	samples := make([]*mat.VecDense, o.NumSamples)
 	randoms := make([]*mat.VecDense, o.NumSamples)
+
+	// compute a basis of LLWB
 	llwb := lin.Complement(az.LLWBperp, o.BPRTol).(*mat.Dense)
 	_, dimLLWB := llwb.Dims()
-
 	lin.CleanTolDense(llwb, o.BPRTol)
 
 	if mat.Equal(llwb, mat.NewDense(o.NumStates, 1, nil)) {
@@ -57,10 +59,9 @@ func TestRandAutomaton(o *AutomatonTestOptions) AutomatonResult {
 		}
 	}
 
-	//lin.PrintMat(llwb)
-
 	autResult := AutomatonResult{Null: false}
 
+	// generate language equivalent (in LLWB) and random pairs of vectors
 	for i := range samples {
 		samples[i] = lin.LinearCombination(llwb, lin.RandVec(dimLLWB, 100))
 		randoms[i] = lin.RandVec(az.Dim, 100)

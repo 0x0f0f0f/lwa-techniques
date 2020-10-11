@@ -7,7 +7,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// generate a random automaton on natural numbers
+// RandNatAutomaton generates a random automaton with weights on natural numbers
 func RandNatAutomaton(syms, states, maxweight int) Automaton {
 	// create the alphabet
 	A := make([]string, syms)
@@ -38,7 +38,7 @@ func RandNatAutomaton(syms, states, maxweight int) Automaton {
 	return aut
 }
 
-// generate a random automaton on real numbers
+// RandAutomaton generates a random automaton with weights on real numbers
 func RandAutomaton(syms, states int, maxweight float64) Automaton {
 	// create the alphabet
 	A := make([]string, syms)

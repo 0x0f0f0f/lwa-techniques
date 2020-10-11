@@ -1,3 +1,5 @@
+// contains test for F1 score related to tolerance values
+
 package randtest
 
 import (
@@ -12,7 +14,7 @@ import (
 	"gonum.org/v1/plot/vg"
 )
 
-func F1TolTask() {
+func F1TolTask(fixedtol float64) {
 
 	start := time.Now()
 
@@ -30,8 +32,8 @@ func F1TolTask() {
 		Verbose:     false,
 	}
 
-	tols := []float64{1e-17, 1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6}
-	tolstr := []string{"1e-17", "1e-16", "1e-15", "1e-14", "1e-13", "1e-12", "1e-11", "1e-10", "1e-9", "1e-8", "1e-7", "1e-6"}
+	tols := []float64{1e-22, 1e-21, 1e-20, 1e-19, 1e-18, 1e-17, 1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6}
+	tolstr := []string{"1e-22", "1e-21", "1e-20", "1e-19", "1e-18", "1e-17", "1e-16", "1e-15", "1e-14", "1e-13", "1e-12", "1e-11", "1e-10", "1e-9", "1e-8", "1e-7", "1e-6"}
 
 	// points on the graph
 	ptsBoth := make(plotter.XYs, len(tols))
@@ -61,7 +63,7 @@ func F1TolTask() {
 		fmt.Println("Running test varying HKC tolerance")
 		HKCAutomataOpts := &AutomatonTestOptions{}
 		copier.Copy(HKCAutomataOpts, aopts)
-		HKCAutomataOpts.BPRTol = 1e-13
+		HKCAutomataOpts.BPRTol = fixedtol
 
 		var HKCBatchOpts BatchTestOptions
 		copier.Copy(&HKCBatchOpts, bopts)
@@ -83,7 +85,7 @@ func F1TolTask() {
 
 		BPRAutomataOpts := &AutomatonTestOptions{}
 		copier.Copy(BPRAutomataOpts, aopts)
-		BPRAutomataOpts.HKCTol = 1e-13
+		BPRAutomataOpts.HKCTol = fixedtol
 
 		var BPRBatchOpts BatchTestOptions
 		copier.Copy(&BPRBatchOpts, bopts)
@@ -125,15 +127,15 @@ func F1TolTask() {
 
 	plotutil.AddLinePoints(p,
 		"Varying tolerance on both BPR and HKC", ptsBoth,
-		"Varying tolerance on BPR, HKC tolerance set to 1e-13", ptsBPR,
-		"Varying tolerance on HKC, BPR tolerance set to 1e-13", ptsHKC)
+		"Varying tolerance on BPR, HKC tolerance set to "+fmt.Sprintf("%g", fixedtol), ptsBPR,
+		"Varying tolerance on HKC, BPR tolerance set to "+fmt.Sprintf("%g", fixedtol), ptsHKC)
 
 	// Save the plot to a PNG file.
-	if err := p.Save(6*vg.Inch, 6*vg.Inch, "paper/plots/f1-tol.png"); err != nil {
+	if err := p.Save(7*vg.Inch, 6*vg.Inch, fmt.Sprintf("paper/plots/f1-tol-%g.png", fixedtol)); err != nil {
 		panic(err)
 	}
 
-	if err := p.Save(6*vg.Inch, 6*vg.Inch, "paper/plots/f1-tol.pdf"); err != nil {
+	if err := p.Save(7*vg.Inch, 6*vg.Inch, fmt.Sprintf("paper/plots/f1-tol-%g.pdf", fixedtol)); err != nil {
 		panic(err)
 	}
 }

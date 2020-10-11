@@ -2,6 +2,7 @@ package lin
 
 import (
 	"log"
+	"math"
 
 	"gonum.org/v1/gonum/mat"
 )
@@ -22,7 +23,7 @@ func OrthonormalColumnSpaceBasis(a mat.Matrix, tol float64) (mat.Matrix, float64
 	// The column space of A is spanned by the first r columns of U.
 	j := 0
 	for _, σ := range svd.Values(nil) {
-		if σ <= tol {
+		if math.Abs(σ) <= tol {
 			break
 		}
 		j++

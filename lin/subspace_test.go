@@ -7,7 +7,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-const test_tol = 10e-14
+const testTol = 10e-14
 
 func TestInSubspace(t *testing.T) {
 	m := mat.NewDense(3, 1, []float64{1, 1, 0})
@@ -18,8 +18,8 @@ func TestInSubspace(t *testing.T) {
 
 	nv := mat.NewVecDense(3, []float64{3, 3, 1})
 
-	assert.True(t, InSubspace(m, v, test_tol))
-	assert.False(t, InSubspace(m, nv, test_tol))
+	assert.True(t, InSubspace(m, v, testTol))
+	assert.False(t, InSubspace(m, nv, testTol))
 
 	// matrix is not modified
 	assert.True(t, mat.Equal(m, om))
@@ -42,7 +42,7 @@ func TestIntersect(t *testing.T) {
 		-1, -1, 1,
 	})
 
-	base := Intersect(test_tol, u, w)
+	base := Intersect(testTol, u, w)
 
 	expected := mat.NewDense(5, 1, []float64{
 		-0.447213595499957927703604809721582569181919097900390625,
@@ -69,7 +69,7 @@ func TestComplement(t *testing.T) {
 		-0.4082482904638629062077370690531097352504730224609375,
 	})
 
-	wperp := Complement(wspan, test_tol)
+	wperp := Complement(wspan, testTol)
 
 	assert.True(t, mat.Equal(expected, wperp))
 

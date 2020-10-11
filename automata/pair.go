@@ -1,3 +1,6 @@
+// this file contains methods for handling vector pairs, exploiting the mat.Dense
+// matrix type
+
 package automata
 
 import (
@@ -6,7 +9,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// creates a new pair of vectors
+// NewPair creates a new pair of vectors
 func NewPair(l, r *mat.VecDense) (*mat.Dense, error) {
 	ld, _ := l.Dims()
 	rd, _ := r.Dims()
@@ -22,17 +25,17 @@ func NewPair(l, r *mat.VecDense) (*mat.Dense, error) {
 	return m, nil
 }
 
-// return left element of a vector pair
+// PairLeft returns left element of a vector pair
 func PairLeft(p *mat.Dense) *mat.VecDense {
 	return p.ColView(0).(*mat.VecDense)
 }
 
-// return right element of a vector pair
+// PairRight returns right element of a vector pair
 func PairRight(p *mat.Dense) *mat.VecDense {
 	return p.ColView(1).(*mat.VecDense)
 }
 
-// return subtraction of elements of a vector pair
+// PairSub returns the subtraction of the elements of a vector pair
 func PairSub(p *mat.Dense) *mat.VecDense {
 	m, _ := p.Dims()
 	sub := mat.NewVecDense(m, nil)
@@ -40,13 +43,13 @@ func PairSub(p *mat.Dense) *mat.VecDense {
 	return sub
 }
 
-// return true if a matrix is a vector pair
+// PairCheck returns true if a matrix is a vector pair
 func PairCheck(p *mat.Dense) bool {
 	_, n := p.Dims()
 	return n == 2
 }
 
-// Returns true if two pairs equal each other
+// PairEqs returns true if two pairs equal each other
 func PairEqs(p, p1 *mat.Dense, tol float64) bool {
 	m, _ := p.Dims()
 	m1, _ := p1.Dims()

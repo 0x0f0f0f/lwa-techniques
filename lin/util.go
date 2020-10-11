@@ -12,7 +12,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// returns true if a vector is composed only of zero values
+// IsZero returns true if a vector is composed only of zero values
 func IsZero(vec *mat.VecDense) bool {
 	for _, el := range vec.RawVector().Data {
 		if el != 0 {
@@ -23,7 +23,7 @@ func IsZero(vec *mat.VecDense) bool {
 	return true
 }
 
-// returns true if a vector is composed only of zero values, with a tolerance of tol
+// IsZeroTol returns true if a vector is composed only of zero values, with a tolerance of tol
 func IsZeroTol(vec *mat.VecDense, tol float64) bool {
 	for _, el := range vec.RawVector().Data {
 		if math.Abs(el) > tol {
@@ -34,7 +34,7 @@ func IsZeroTol(vec *mat.VecDense, tol float64) bool {
 	return true
 }
 
-// create an n*n identity matrix
+// EyeDense creates an n*n identity matrix
 func EyeDense(n int) *mat.Dense {
 	a := mat.NewDense(n, n, nil)
 	for i := 0; i < n; i++ {
@@ -52,7 +52,7 @@ func randFloat64(w float64) float64 {
 	return sign * rand.Float64() * w
 }
 
-// generate a normally distributed random n*n matrix
+// RandDense generates a normally distributed random n*n matrix
 func RandDense(n int, maxweight float64) *mat.Dense {
 	data := make([]float64, n*n)
 	for i := range data {
@@ -61,7 +61,7 @@ func RandDense(n int, maxweight float64) *mat.Dense {
 	return mat.NewDense(n, n, data)
 }
 
-// generate a normally distributed random integer n*n matrix
+// RandIntDense generates a normally distributed random integer n*n matrix
 func RandIntDense(n, max int) *mat.Dense {
 	data := make([]float64, n*n)
 	for i := range data {
@@ -70,7 +70,7 @@ func RandIntDense(n, max int) *mat.Dense {
 	return mat.NewDense(n, n, data)
 }
 
-// set z randomly chosen values in the matrix to 0
+// PokeHoles sets z randomly chosen values in the matrix to 0
 func PokeHoles(a *mat.Dense, z int) {
 	m, n := a.Dims()
 	for k := 0; k < z; k++ {
@@ -81,7 +81,7 @@ func PokeHoles(a *mat.Dense, z int) {
 	}
 }
 
-// performs a linear combination of the columns of v and the coefficients
+// LinearCombination performs a linear combination of the columns of v and the coefficients
 // in the elements of b
 func LinearCombination(a *mat.Dense, b *mat.VecDense) *mat.VecDense {
 	m, n := a.Dims()
@@ -100,7 +100,7 @@ func LinearCombination(a *mat.Dense, b *mat.VecDense) *mat.VecDense {
 	return res
 }
 
-// generate a normally distributed random n*1 vector
+// RandVec generate a normally distributed random n*1 vector
 func RandVec(n int, maxweight float64) *mat.VecDense {
 	data := make([]float64, n)
 	for i := range data {
@@ -109,7 +109,7 @@ func RandVec(n int, maxweight float64) *mat.VecDense {
 	return mat.NewVecDense(n, data)
 }
 
-// generate a normally distributed random n*1 vector on natural numebrs
+// RandNatVec generate a normally distributed random n*1 vector on natural numebrs
 func RandNatVec(n, max int) *mat.VecDense {
 	data := make([]float64, n)
 	for i := range data {
@@ -118,27 +118,27 @@ func RandNatVec(n, max int) *mat.VecDense {
 	return mat.NewVecDense(n, data)
 }
 
-// generate a zero matrix of size m*n
+// ZeroDense generates a zero matrix of size m*n
 func ZeroDense(m, n int) *mat.Dense {
 	return mat.NewDense(m, n, nil)
 }
 
-// generate a zero vector of length n
+// ZeroVec generates a zero vector of length n
 func ZeroVec(n int) *mat.VecDense {
 	return mat.NewVecDense(n, nil)
 }
 
-// string representation of a matrix
+// StringMat returns a string representation of a matrix
 func StringMat(a mat.Matrix) string {
 	return fmt.Sprintf("%.5g", mat.Formatted(a, mat.Squeeze()))
 }
 
-// print a matrix to stdout
+// PrintMat prints a matrix to stdout
 func PrintMat(a mat.Matrix) {
 	fmt.Println(StringMat(a))
 }
 
-// set elements of a to 0 if they are < tol (in abs)
+// CleanTolDense sets elements of a to 0 if they are < tol (in abs)
 func CleanTolDense(a *mat.Dense, tol float64) {
 	m, n := a.Dims()
 	for i := 0; i < m; i++ {

@@ -84,7 +84,8 @@ func readDense(scanner *bufio.Scanner, rows, cols int) (*mat.Dense, error) {
 	return mat.NewDense(rows, cols, data), nil
 }
 
-// Read an linear weighted automaton from a reader. If prompt is true
+// ReadAutomaton reads an linear weighted automaton from
+//  a reader. If prompt is true
 // then questions are asked (printed to stderr) before scanning
 func ReadAutomaton(r io.Reader, prompt bool) (*Automaton, error) {
 	a := &Automaton{}
@@ -146,7 +147,7 @@ func ReadAutomaton(r io.Reader, prompt bool) (*Automaton, error) {
 	return a, nil
 }
 
-// Decorated representation of an automaton
+// FancyString returns a decorated representation of an automaton
 func (a Automaton) FancyString() string {
 	var buf bytes.Buffer
 

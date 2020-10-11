@@ -7,6 +7,8 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+// Nullspace computes a null space basis of a given matrix,
+// with respect to tolerance.
 // columns of the returned matrix form an orthonormal basis
 // for the nullspace of matrix a, computed
 // through svd decomposition. also returns the maximum residual

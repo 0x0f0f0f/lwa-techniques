@@ -4,7 +4,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// returns true iff the vector b is included in U's column space
+// InSubspace returns true iff the vector b is included in U's column space
 // to do so we check if the matrix U and [U|b] have the same rank
 func InSubspace(u *mat.Dense, b *mat.VecDense, tol float64) bool {
 	var svd mat.SVD
@@ -24,7 +24,7 @@ func InSubspace(u *mat.Dense, b *mat.VecDense, tol float64) bool {
 	return ranku == rankub
 }
 
-// compute a basis for the intersection of many vector spaces
+// Intersect computes a basis for the intersection of many vector spaces
 func Intersect(tol float64, spansets ...mat.Matrix) mat.Matrix {
 	a := mat.DenseCopyOf(spansets[0])
 	for i, span := range spansets {
@@ -43,7 +43,7 @@ func Intersect(tol float64, spansets ...mat.Matrix) mat.Matrix {
 	return ker
 }
 
-// compute a basis for the union of many vector spaces
+// Union computes a basis for the union of many vector spaces
 func Union(spansets ...*mat.Dense) *mat.Dense {
 	n, j := spansets[0].Dims()
 
@@ -62,7 +62,7 @@ func Union(spansets ...*mat.Dense) *mat.Dense {
 	return basis
 }
 
-// compute the orthogonal complement of a vector subspace of R^n
+// Complement computes the orthogonal complement of a vector subspace of R^n
 func Complement(spanset mat.Matrix, tol float64) mat.Matrix {
 	n, m := spanset.Dims()
 	// the orthogonal complement of {} is R^n

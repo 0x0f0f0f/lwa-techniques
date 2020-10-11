@@ -11,7 +11,7 @@ import (
 )
 
 // BackwardsPartitionRefinement computes and stores a basis for the
-// largest linear weighted bisimulation of
+// complement of the largest linear weighted bisimulation of
 // the linear weighted automaton. returns the condition number
 func (a *Automaton) BackwardsPartitionRefinement() float64 {
 	// i = 0
@@ -32,8 +32,6 @@ func (a *Automaton) BackwardsPartitionRefinement() float64 {
 		lastCond = cond
 	}
 
-	// fmt.Println(lastCond)
-
 	a.LLWBperp = currBasis
 	// we could compute the orthogonal complement to find a basis of LLWB:
 	// a.LLWB = lin.Complement(currBasis).(*mat.Dense)
@@ -42,7 +40,6 @@ func (a *Automaton) BackwardsPartitionRefinement() float64 {
 
 // BPREquivalence checks the equivalence of 2 vectors
 // after a basis of the LLWB is computed through BPR,
-
 func (a Automaton) BPREquivalence(v1, v2 *mat.VecDense) bool {
 	if a.LLWBperp == nil {
 		log.Fatalln("largest linear weighted bisimulation not computed for automaton")

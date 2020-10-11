@@ -3,12 +3,12 @@
 %TODO da fare e sistemare.
 
 %\subsection{Tolerance and F1 Score}
-The first runtime result we introduce is the study of the influence 
-of the tolerance value choice over the correctness of the algorithms results.
+We the studied of the influence 
+of the tolerance value over the correctness of the algorithms results.
 Tests took place on randomly generated automata. A basis of  $\llwb$ was 
 computed for each automaton with BPR. An arbitrary number of vector pairs were generated 
-as a random linear combination of the vectors in the spanning set of $\llwb$. 
-An identical quantity of completely random vector pairs were generated.
+as an uniformly distributed random linear combination of the vectors in the spanning set of $\llwb$. 
+The same quantity of vector pairs was generated randomly with an uniform distribution.
 BPREquivalence and HKC procedures were then executed with those pairs in input.
 
 By defining pairs of vectors as 
@@ -47,10 +47,18 @@ TODO: BPR conditioning
 
 \begin{figure}[htbp!]
     \centering
-    \includegraphics[width=.8\textwidth]{./plots/f1-tol.pdf}
-    
-    \caption{F1 score over tolerance tests, 1000 vector pairs tested per automaton.}
+    \includegraphics[width=.75\textwidth]{./plots/f1-tol-1e-06.pdf}
+    \includegraphics[width=.75\textwidth]{./plots/f1-tol-1e-13.pdf}
+    \caption{F1 score over tolerance tests, 2000 vector pairs tested per automaton.}
     \label{fig:f1}
+\end{figure}
+
+\begin{figure}[htbp!]
+    \centering
+    \includegraphics[width=.75\textwidth]{./plots/f1-tol-1e-16.pdf}
+    \includegraphics[width=.75\textwidth]{./plots/f1-tol-1e-20.pdf}
+    \caption{F1 score over tolerance tests, 2000 vector pairs tested per automaton.}
+    \label{fig:f1-2}
 \end{figure}
 
 

@@ -3,12 +3,15 @@
 package automata
 
 import (
+	"math"
+
 	"gonum.org/v1/gonum/mat"
 )
 
-// checks the language equivalence of two state vectors for a given weighted automaton
+// HKC checks the language equivalence of two state vectors for a
+// given weighted automaton by building a congruence relation
 func (a Automaton) HKC(v1, v2 *mat.VecDense) (bool, error) {
-	rel := NewRelation(0, a.Dim)
+	rel := NewRelation(a.HKCTol, a.Dim)
 	todo := NewPairStack()
 
 	p, err := NewPair(v1, v2)
@@ -30,9 +33,9 @@ func (a Automaton) HKC(v1, v2 *mat.VecDense) (bool, error) {
 			continue
 		}
 
-		o1 := a.GetOutput(PairLeft(q), a.HKCTol)
-		o2 := a.GetOutput(PairRight(q), a.HKCTol)
-		if o1 != o2 {
+		o1 := a.GetOutput(PairLeft(q))
+		o2 := a.GetOutput(PairRight(q))
+		if math.Abs(o1-o2) > a.HKCTol {
 			return false, nil
 		}
 

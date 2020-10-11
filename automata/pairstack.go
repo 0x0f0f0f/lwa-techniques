@@ -8,13 +8,15 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+// NewPairStack creates a new pair stack, exploiting the mat.Dense matrix
+// data type
 func NewPairStack() *mat.Dense {
 	m := mat.NewDense(1, 1, nil)
 	m.Reset()
 	return m
 }
 
-// returns the size
+// PairStackSize returns the size of a pair stack
 func PairStackSize(s *mat.Dense) int {
 	if s.IsEmpty() {
 		return 0
@@ -23,7 +25,7 @@ func PairStackSize(s *mat.Dense) int {
 	return n
 }
 
-// push a pair into the stack
+// PairStackPush pushes a pair into the stack
 func PairStackPush(s *mat.Dense, p *mat.Dense) *mat.Dense {
 	if s.IsEmpty() {
 		return mat.DenseCopyOf(p)
@@ -32,7 +34,7 @@ func PairStackPush(s *mat.Dense, p *mat.Dense) *mat.Dense {
 	return s
 }
 
-// pop a pair from the stack
+// PairStackPop pops a pair from the stack
 func PairStackPop(s *mat.Dense) (*mat.Dense, error) {
 	if s.IsEmpty() {
 		return nil, errors.New("stack is empty")

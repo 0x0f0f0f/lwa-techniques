@@ -7,7 +7,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// represents a relation between sets of vectors of R^n.
+// Relation represents a relation between sets of vectors of R^n.
 // the relation is a congruence if it is an equivalence
 // and is closed under linear combinations.
 type Relation struct {
@@ -18,7 +18,7 @@ type Relation struct {
 	tol  float64
 }
 
-// creates a new empty relation
+// NewRelation creates a new empty relation
 func NewRelation(tol float64, dim int) Relation {
 	s := mat.NewDense(dim, 1, nil)
 	u := mat.NewDense(dim, 1, nil)
@@ -27,6 +27,7 @@ func NewRelation(tol float64, dim int) Relation {
 	return Relation{tol: tol, dim: dim, s: s, u: u}
 }
 
+// GetPair returns the pair in the relation at index i
 func (r Relation) GetPair(i int) (*mat.Dense, error) {
 	if i < 0 || i >= r.size {
 		return nil, errors.New("index out of bounds")
@@ -34,7 +35,8 @@ func (r Relation) GetPair(i int) (*mat.Dense, error) {
 	return r.s.Slice(0, r.dim, i*2, (i*2)+2).(*mat.Dense), nil
 }
 
-// returns true if the relation contains the pair of vectors. O(n)
+// Has returns true if the relation contains the given pair of vectors.
+// Computes in O(n). Could be done better by ordering.
 func (r Relation) Has(p *mat.Dense) bool {
 	m, _ := r.s.Dims()
 	if m != r.dim && !PairCheck(p) {
@@ -52,7 +54,7 @@ func (r Relation) Has(p *mat.Dense) bool {
 	return false
 }
 
-// adds a pair of vectors to the relation
+// Add adds a pair of vectors to the relation
 func (r *Relation) Add(p *mat.Dense) {
 	// if the set already contains the pair (v, v'), return
 	if r.Has(p) {
@@ -88,7 +90,8 @@ func (r *Relation) Add(p *mat.Dense) {
 	}
 }
 
-// check if a pair of vectors is in a relation's congruence closure.
+// PairIsInCongruenceClosure checks
+//  if a pair of vectors is in a relation's congruence closure.
 func (r Relation) PairIsInCongruenceClosure(p *mat.Dense) bool {
 	// sub = v - v'
 	sub := PairSub(p)
